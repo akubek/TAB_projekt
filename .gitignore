@@ -1,0 +1,17 @@
+#db config file
+config/database.php
+
+#editor/IDE and system files
+.vscode/
+.idea/
+.vs/
+.DS_Store
+Thumbs.db
+
+#npm or typescript
+node_modules/
+npm-debug.log
+yarn-error.log
+yarn.log
+/dist
+/build
