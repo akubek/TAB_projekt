@@ -1,6 +1,12 @@
 #db config file
 config/database.php
 
+.env
+*.log
+
+#local docker ovverrides
+docker-compose.override.yml
+
 #editor/IDE and system files
 .vscode/
 .idea/
