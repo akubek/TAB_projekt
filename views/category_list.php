@@ -1,10 +1,3 @@
-<nav aria-label="breadcrumb" class="mb-4">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="index.php?page=home">Strona Główna</a></li>
-        <li class="breadcrumb-item active" aria-current="page"><?= htmlspecialchars($currentCategory['name']) ?></li>
-    </ol>
-</nav>
-
 <div class="text-center mb-5">
     <h1 class="display-4 fw-bold"><?= htmlspecialchars($currentCategory['name']) ?></h1>
     <p class="lead text-muted">Wybierz interesującą Cię kategorię produktów</p>
@@ -27,6 +20,15 @@
         </div>
     <?php endforeach; ?>
 </div>
+
+<hr class="my-5 text-muted">
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="h3 fw-bold m-0">Wszystkie nowości: <?= htmlspecialchars($currentCategory['name']) ?></h2>
+    <span class="text-muted">Ilość produktów: <?= count($products) ?></span>
+</div>
+
+<?php require 'partials/product_grid.php'; ?>
 
 <div class="text-center mb-5">
     <a href="index.php?page=home" class="btn btn-outline-secondary">

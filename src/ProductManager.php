@@ -19,28 +19,47 @@ class ProductManager {
     }
 
     // load all products from given category and its subcategories. f.e. "męska -> tshirt+kurtki->(zimowe+inne+...)+koszule..."
-    public function getProductsByCategory($categoryId) {
+    public function getProductsByCategory($categoryId, $limit = null, $orderBy = 'newest') {
+        
+        // Bezpieczne mapowanie sortowania (chroni przed SQL Injection)
+        $orderings = [
+            'newest'     => 'p.id DESC',
+            'price_asc'  => 'p.base_price ASC',
+            'price_desc' => 'p.base_price DESC',
+            'name_asc'   => 'p.name ASC'
+        ];
+        
+        // Jeśli ktoś przekaże błędny parametr, domyślnie bierzemy 'newest'
+        $sqlOrder = $orderings[$orderBy] ?? $orderings['newest'];
+
         $sql = "
             WITH RECURSIVE CategoryTree AS (
-                -- Starting category
                 SELECT id FROM categories WHERE id = :category_id
                 UNION
-                -- recursively add all categories
                 SELECT c.id FROM categories c
                 INNER JOIN CategoryTree ct ON c.parent_id = ct.id
             )
-            -- get all the products in category tree
             SELECT p.*, c.name as category_name
             FROM products p
             JOIN categories c ON p.category_id = c.id
             WHERE p.category_id IN (SELECT id FROM CategoryTree)
-            ORDER BY p.id DESC;
+            ORDER BY $sqlOrder
         ";
+        
+        // Jeśli podano limit, doklejamy go do zapytania
+        if ($limit !== null) {
+            $sql .= " LIMIT :limit";
+        }
         
         $stmt = $this->pdo->prepare($sql);
         $stmt->bindValue(':category_id', $categoryId, PDO::PARAM_INT);
+        
+        if ($limit !== null) {
+            $stmt->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
+        }
+        
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
+    } 
 }
 ?>
