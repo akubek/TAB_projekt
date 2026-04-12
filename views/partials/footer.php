@@ -5,31 +5,31 @@
             
       <div class="col-md-4 mb-4 mb-md-0">
         <h5 class="text-uppercase mb-3">Kontakt</h5>
-        <address class="text-secondary mb-0">
+        <address class="mb-0">
           <strong>Super Sklep Sp. z o.o.</strong><br>
           ul. Przykładowa 12/3<br>
           00-001 Warszawa<br><br>
-          Telefon: <a href="tel:+48123456789" class="text-secondary text-decoration-none">123 456 789</a><br>
-          Email: <a href="mailto:kontakt@supersklep.pl" class="text-secondary text-decoration-none">kontakt@supersklep.pl</a>
+          Telefon: <a href="tel:+48123456789" class="text-light text-decoration-none">123 456 789</a><br>
+          Email: <a href="mailto:kontakt@supersklep.pl" class="text-light text-decoration-none">kontakt@supersklep.pl</a>
         </address>
       </div>
 
       <div class="col-md-4 mb-4 mb-md-0 text-md-center">
         <h5 class="text-uppercase mb-3">Śledź nas</h5>
         <ul class="list-unstyled d-flex justify-content-md-center gap-3">
-          <li><a href="#!" class="text-secondary text-decoration-none hover-white">Facebook</a></li>
-          <li><a href="#!" class="text-secondary text-decoration-none hover-white">Instagram</a></li>
-          <li><a href="#!" class="text-secondary text-decoration-none hover-white">TikTok</a></li>
+          <li><a href="#!" class="text-light text-decoration-none hover-white">Facebook</a></li>
+          <li><a href="#!" class="text-light text-decoration-none hover-white">Instagram</a></li>
+          <li><a href="#!" class="text-light text-decoration-none hover-white">TikTok</a></li>
         </ul>
       </div>
 
       <div class="col-md-4 text-md-end">
         <h5 class="text-uppercase mb-3">O sklepie</h5>
-        <p class="text-secondary mb-1">
+        <p class="mb-1">
           Sklep z odzieżą, projekt Zaliczeniowy TAB
         </p>
 
-        <small class="text-muted">
+        <small class="text-white-50">
           &copy; <?= date('Y') ?> projekt studencki sklepu z odzieżą.<br> Wszelkie prawa zastrzeżone.
         </small>
       </div>
