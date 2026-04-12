@@ -10,12 +10,13 @@ $categoryManager = new CategoryManager($pdo);
 
 $page = $_GET['page'] ?? 'home';
 
+$rootCategories = $categoryManager->getRootCategories();
+$mainCategories = $categoryManager->getSubcategories($rootCategories[0]['id']);
+
 require_once '../views/partials/header.php';
 
 switch ($page) {
     case 'home':
-        // Na stronie głównej ładujemy TYLKO główne kategorie (Level 1)
-        $categories = $categoryManager->getRootCategories();
         require_once '../views/home.php';
         break;
 
