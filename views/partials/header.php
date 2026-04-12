@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
 </head>
-<body>
+<body class="bg-light">
 
 <header>
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
@@ -21,20 +21,32 @@
       </button>
 
       <div class="collapse navbar-collapse" id="navbarnav">
-        <ul class="navbar-nav me-auto">
-          <li class="nav-item">
-            <a class="nav-link active" href="index.php?page=home">strona główna</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="index.php?page=catalog">katalog</a>
-          </li>
+        <ul class="navbar-nav mx-auto">
+          <?php if (!empty($mainCategories)): ?>
+            <?php foreach ($mainCategories as $category): ?>
+              <li class="nav-item">
+                <a class="nav-link" href="index.php?page=category&id=<?=$category['id'] ?>">
+                  <?= htmlspecialchars($category['name']) ?>
+                </a>
+              </li>
+            <?php endforeach; ?>
+          <?php endif; ?>
         </ul>
 
-        <div class="d-flex align-items-center">
-          <a href="index.php?page=cart" class="btn btn-outline-light me-2">
-            koszyk <span class="badge bg-primary">0</span>
-          </a>
-          <a href="index.php?page=login" class="btn btn-primary">zaloguj</a>
+        <div class="d-flex align-items-center gap-3">
+                
+          <form class="d-flex" action="index.php" method="GET">
+            <input type="hidden" name="page" value="search">
+            <input class="form-control me-2" type="search" name="q" placeholder="Czego szukasz?" aria-label="Search">
+            <button class="btn btn-outline-light" type="submit">Szukaj</button>
+          </form>
+
+          <div class="d-flex gap-2">
+            <a href="index.php?page=cart" class="btn btn-outline-light text-nowrap">
+                Koszyk <span class="badge bg-primary">0</span>
+            </a>
+            <a href="index.php?page=login" class="btn btn-primary text-nowrap">Zaloguj</a>
+          </div>
         </div>
       </div>
     </div>

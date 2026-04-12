@@ -1,10 +1,10 @@
 <h2>Wybierz dział</h2>
 
-<?php if (empty($categories)): ?>
+<?php if (empty($rootCategories)): ?>
     <p>Brak kategorii w bazie.</p>
 <?php else: ?>
     <ul style="list-style: none; padding: 0; display: flex; gap: 20px;">
-        <?php foreach ($categories as $category): ?>
+        <?php foreach ($rootCategories as $category): ?>
             <li style="border: 1px solid #ccc; padding: 20px; border-radius: 8px; text-align: center;">
                 <h3><?= htmlspecialchars($category['name']) ?></h3>
                 <a href="index.php?page=category&id=<?= $category['id'] ?>" 
