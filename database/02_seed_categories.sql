@@ -20,9 +20,7 @@ INSERT INTO categories (id, name, parent_id) VALUES
 (301, 'Swetry',13),
 (302, 'Koszulki',13),
 -- t-shirst in unisex category
-(401, 'Koszulki',14);
+(401, 'Koszulki',14),
+(402, 'Testowe', 14);
 
--- Sample products - t-shirts
-INSERT INTO products (category_id, brand_name, name, description, base_price) VALUES 
-(103, 'Nike', 'Koszulka Sportowa Basic', 'Oddychająca koszulka.', 129.99),
-(203, 'Nike', 'Koszulka Sportowa Basic', 'Oddychająca koszulka.', 129.99);
+SELECT setval('categories_id_seq', (SELECT MAX(id) FROM categories));
