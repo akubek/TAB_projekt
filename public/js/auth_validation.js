@@ -10,8 +10,10 @@ document.addEventListener('DOMContentLoaded', () => {
         let isValid = true;
 
         if (input.id === 'email') {
+            let cleanEmail = input.value.trim().toLowerCase();
+            input.value = cleanEmail;
             const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            isValid = re.test(input.value.trim());
+            isValid = re.test(cleanEmail);
         } else if (input.id === 'password') {
             isValid = input.value.length >= 8;
         } else {

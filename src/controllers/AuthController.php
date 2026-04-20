@@ -12,7 +12,7 @@ class AuthController {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $firstName = trim($_POST['first_name'] ?? '');
             $lastName = trim($_POST['last_name'] ?? '');
-            $email = trim($_POST['email'] ?? '');
+            $email = mb_strtolower(trim($_POST['email'] ?? ''), 'UTF-8');
             $password = $_POST['password'] ?? '';
             
             if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -45,7 +45,12 @@ class AuthController {
                         header("Location: index.php?page=login");
                         exit;
                     } catch (PDOException $e) {
-                        $error_message = "Wystąpił błąd: " . $e->getMessage();
+                        error_log("Registration error for email {$email}) : " . $e->getMessage());
+                        if (in_array((string) $e->getCode(), ['23000', '23505'], true)) {
+                            $error_message = "Konto z tym adresem e-mail już istnieje";
+                        } else {
+                            $error_message = "Błąd podczas rejestracji";
+                        }
                     }
                 }
             }
@@ -59,7 +64,7 @@ class AuthController {
         unset($_SESSION['flash_success']);
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $email = trim($_POST['email'] ?? '');
+            $email = $email = mb_strtolower(trim($_POST['email'] ?? ''), 'UTF-8');
             $password = $_POST['password'] ?? '';
 
             // Szukamy użytkownika po e-mailu

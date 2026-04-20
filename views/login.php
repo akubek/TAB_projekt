@@ -6,7 +6,7 @@
                     <h2 class="text-center mb-4 fw-bold">Logowanie</h2>
 
                     <?php if (!empty($success_message)): ?>
-                        <div class="alert alert-success"><?= htmlspecialchars($success_message) ?></div>
+                        <div class="alert alert-success"><?= e($success_message) ?></div>
                     <?php endif; ?>
 
                     <?php if (!empty($login_error)): ?>
