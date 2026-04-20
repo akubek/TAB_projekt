@@ -45,7 +45,7 @@ class AuthController {
                         header("Location: index.php?page=login");
                         exit;
                     } catch (PDOException $e) {
-                        error_log("Registration error for email {$email}) : " . $e->getMessage());
+                        error_log("Registration error for email {$email} : " . $e->getMessage());
                         if (in_array((string) $e->getCode(), ['23000', '23505'], true)) {
                             $error_message = "Konto z tym adresem e-mail już istnieje";
                         } else {
