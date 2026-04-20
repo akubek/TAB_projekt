@@ -62,31 +62,32 @@ class AuthController {
         
         $success_message = $_SESSION['flash_success'] ?? '';
         unset($_SESSION['flash_success']);
-
+        
+        // additional email format check
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $email = $email = strtolower(trim($_POST['email'] ?? ''));
             $password = $_POST['password'] ?? '';
 
-            // Szukamy użytkownika po e-mailu
+            // find user by email
             $stmt = $this->pdo->prepare("SELECT * FROM users WHERE email = :email");
             $stmt->execute(['email' => $email]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            // Weryfikujemy, czy użytkownik istnieje i czy hasło pasuje do hasha z bazy
+            // user is registered in database and passwords match
             if ($user && password_verify($password, $user['password_hash'])) {
                 
-                // Tworzymy sesję
+                // create session for user
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['role'] = $user['role'];
                 $_SESSION['first_name'] = $user['first_name'];
 
-                // 4. Przekierowujemy na stronę główną
+                // redirect to main page
                 header("Location: index.php?page=home");
                 exit;
             } else {
                 $login_error = "Nieprawidłowy adres e-mail lub hasło.";
             }
-        }
+       }
         require_once '../views/login.php';
     }
     public function logout() {

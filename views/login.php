@@ -18,7 +18,7 @@
                     <form action="index.php?page=login" method="POST">
                         <div class="mb-3">
                             <label for="login_email" class="form-label">Adres e-mail</label>
-                            <input type="email" class="form-control" id="login_email" name="email" required>
+                            <input type="email" style="text-transform: lowercase;" class="form-control" id="login_email" name="email" required autocapitalize="none">
                         </div>
                         <div class="mb-3">
                             <label for="login_password" class="form-label">Hasło</label>
