@@ -68,7 +68,7 @@ class AuthController {
             $password = $_POST['password'] ?? '';
 
             // additional email format check
-            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 // find user by email
                 $stmt = $this->pdo->prepare("SELECT * FROM users WHERE email = :email");
                 $stmt->execute(['email' => $email]);
@@ -88,6 +88,7 @@ class AuthController {
                 } else {
                     $login_error = "Nieprawidłowy adres e-mail lub hasło.";
                 }
+            } else {
                 $login_error = "Nieprawidłowy format e-mail.";
             }
         }

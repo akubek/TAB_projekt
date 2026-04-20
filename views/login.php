@@ -10,9 +10,7 @@
                     <?php endif; ?>
 
                     <?php if (!empty($login_error)): ?>
-                        <div class="alert alert-danger" role="alert">
-                            Nieprawidłowy adres e-mail lub hasło.
-                        </div>
+                        <div class="alert alert-danger" role="alert"><?= e($success_message) ?></div>
                     <?php endif; ?>
 
                     <form id="login-form" action="index.php?page=login" method="POST" novalidate>

@@ -31,10 +31,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const emailInput = document.getElementById('email');
         const passwordInput = document.getElementById('password');
 
+        // submit button is enabled by default in form in case the script doesn't load
+        // if the script was properly loaded disable the submit button because:
+        // fresh page should have empty fields -> invalid form -> disable submit
+        submitBtn.disabled = true;
+
         const validateLogin = () => {
             const isEmailValid = checkEmail(emailInput);
             const isPasswordValid = passwordInput.value.trim().length > 0;
-
+    
             toggleClasses(emailInput, isEmailValid);
             toggleClasses(passwordInput, isPasswordValid);
 
@@ -46,6 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
         passwordInput.addEventListener('input', validateLogin);
         passwordInput.addEventListener('change', validateLogin);
         passwordInput.addEventListener('blur', validateLogin);
+        
     }
     
     //register form check
