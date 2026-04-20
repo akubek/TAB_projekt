@@ -40,7 +40,10 @@ class AuthController {
                             'email' => $email,
                             'password_hash' => $hashedPassword
                         ]);
-                        $success_message = "Konto zostało pomyślnie utworzone! Możesz się teraz zalogować.";
+
+                        $_SESSION['flash_success'] = "Konto zostało pomyślnie utworzone! Możesz się teraz zalogować.";
+                        header("Location: index.php?page=login");
+                        exit;
                     } catch (PDOException $e) {
                         $error_message = "Wystąpił błąd: " . $e->getMessage();
                     }
@@ -51,6 +54,9 @@ class AuthController {
     }
     public function showLogin() {
         $login_error = '';
+        
+        $success_message = $_SESSION['flash_success'] ?? '';
+        unset($_SESSION['flash_success']);
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $email = trim($_POST['email'] ?? '');

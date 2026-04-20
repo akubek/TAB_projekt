@@ -4,7 +4,11 @@
             <div class="card shadow-sm border-0">
                 <div class="card-body p-4">
                     <h2 class="text-center mb-4 fw-bold">Logowanie</h2>
-                    
+
+                    <?php if (!empty($success_message)): ?>
+                        <div class="alert alert-success"><?= htmlspecialchars($success_message) ?></div>
+                    <?php endif; ?>
+
                     <?php if (!empty($login_error)): ?>
                         <div class="alert alert-danger" role="alert">
                             Nieprawidłowy adres e-mail lub hasło.
