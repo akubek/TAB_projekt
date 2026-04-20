@@ -63,31 +63,34 @@ class AuthController {
         $success_message = $_SESSION['flash_success'] ?? '';
         unset($_SESSION['flash_success']);
         
-        // additional email format check
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $email = $email = strtolower(trim($_POST['email'] ?? ''));
+            $email = strtolower(trim($_POST['email'] ?? ''));
             $password = $_POST['password'] ?? '';
 
-            // find user by email
-            $stmt = $this->pdo->prepare("SELECT * FROM users WHERE email = :email");
-            $stmt->execute(['email' => $email]);
-            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+            // additional email format check
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                // find user by email
+                $stmt = $this->pdo->prepare("SELECT * FROM users WHERE email = :email");
+                $stmt->execute(['email' => $email]);
+                $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            // user is registered in database and passwords match
-            if ($user && password_verify($password, $user['password_hash'])) {
-                
-                // create session for user
-                $_SESSION['user_id'] = $user['id'];
-                $_SESSION['role'] = $user['role'];
-                $_SESSION['first_name'] = $user['first_name'];
+                // user is registered in database and passwords match
+                if ($user && password_verify($password, $user['password_hash'])) {
+                    
+                    // create session for user
+                    $_SESSION['user_id'] = $user['id'];
+                    $_SESSION['role'] = $user['role'];
+                    $_SESSION['first_name'] = $user['first_name'];
 
-                // redirect to main page
-                header("Location: index.php?page=home");
-                exit;
-            } else {
-                $login_error = "Nieprawidłowy adres e-mail lub hasło.";
+                    // redirect to main page
+                    header("Location: index.php?page=home");
+                    exit;
+                } else {
+                    $login_error = "Nieprawidłowy adres e-mail lub hasło.";
+                }
+                $login_error = "Nieprawidłowy format e-mail.";
             }
-       }
+        }
         require_once '../views/login.php';
     }
     public function logout() {

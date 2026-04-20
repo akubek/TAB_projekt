@@ -6,7 +6,7 @@
                     <h2 class="text-center mb-4 fw-bold">Logowanie</h2>
 
                     <?php if (!empty($success_message)): ?>
-                        <div class="alert alert-success"><?= e($success_message) ?></div>
+                        <div class="alert alert-success" role="alert"><?= e($success_message) ?></div>
                     <?php endif; ?>
 
                     <?php if (!empty($login_error)): ?>
@@ -26,7 +26,7 @@
                             <input type="password" class="form-control" id="password" name="password" required>
                             <div class="invalid-feedback">Hasło nie może być puste.</div>
                         </div>
-                        <button type="submit" class="btn btn-primary w-100 btn-lg mt-3" disabled>Zaloguj się</button>
+                        <button type="submit" class="btn btn-primary w-100 btn-lg mt-3" >Zaloguj się</button>
                     </form>
                     <div class="mt-3 text-center">
                         <p>Nie masz konta? <a href="index.php?page=register">Zarejestruj się</a></p>

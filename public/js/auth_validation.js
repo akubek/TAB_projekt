@@ -44,6 +44,8 @@ document.addEventListener('DOMContentLoaded', () => {
         emailInput.addEventListener('input', validateLogin);
         emailInput.addEventListener('blur', validateLogin);
         passwordInput.addEventListener('input', validateLogin);
+        passwordInput.addEventListener('change', validateLogin);
+        passwordInput.addEventListener('blur', validateLogin);
     }
     
     //register form check
