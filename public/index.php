@@ -36,7 +36,7 @@ try {
     $mainCategories = $firstRootCatId ? $categoryManager->getSubcategories($firstRootCatId) : [];
 
 } catch (Exception $e) {
-    error_log("CRITICAL ERROR" . $e->getMessage());
+    error_log("CRITICAL ERROR: " . get_class($e) . ": " . $e->getMessage());
     http_response_code(500);
     $page = '500';
 }
