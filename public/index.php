@@ -13,7 +13,7 @@ require_once '../src/controllers/ReviewController.php';
 require_once '../src/helpers.php';
 
 // database connection
-$pdo = Database::getConnection();
+$pdo = DatabaseConnection::getConnection();
 
 // managers 
 $productManager = new ProductManager($pdo);
