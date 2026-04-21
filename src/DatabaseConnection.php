@@ -7,7 +7,7 @@ class DatabaseConnection {
             
             $config = require_once '../config/database.php';
             
-            $dsn = "pgsql:host={$config[host]};port={$config['port']};dbname={$config['database']};";
+            $dsn = "pgsql:host={$config['host']};port={$config['port']};dbname={$config['database']};";
             
             try {
                 self::$pdo = new PDO($dsn, $config['username'], $config['password'], [
