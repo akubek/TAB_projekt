@@ -8,7 +8,7 @@
             </p>
             <p>
                 <a href="index.php?page=catalog" class="btn btn-primary btn-lg px-4 me-md-2">Zobacz nowości</a>
-                <a href="#kategorie" class="btn btn-outline-secondary btn-lg px-4">Przeglądaj działy</a>
+                <a href="index.php?page=category&id=1" class="btn btn-primary btn-lg px-4 me-md-2">Przeglądaj działy</a>
             </p>
         </div>
     </div>
@@ -35,7 +35,7 @@
                 <img src="https://placehold.co/600x400/eeeeee/999999?text=Odziez+Meska" class="card-img-top object-fit-cover" alt="Męska" style="height: 250px;">
                 <div class="card-body text-center">
                     <h3 class="card-title fw-bold mb-0">Odzież Męska</h3>
-                    <a href="#" class="stretched-link"></a>
+                    <a href="index.php?page=category&id=11" class="stretched-link"></a>
                 </div>
             </div>
         </div>
@@ -44,16 +44,16 @@
                 <img src="https://placehold.co/600x400/eeeeee/999999?text=Odziez+Damska" class="card-img-top object-fit-cover" alt="Damska" style="height: 250px;">
                 <div class="card-body text-center">
                     <h3 class="card-title fw-bold mb-0">Odzież Damska</h3>
-                    <a href="#" class="stretched-link"></a>
+                    <a href="index.php?page=category&id=12" class="stretched-link"></a>
                 </div>
             </div>
         </div>
         <div class="col">
             <div class="card h-100 shadow-sm border-0 position-relative">
                 <img src="https://placehold.co/600x400/eeeeee/999999?text=Odziez+Dziecieca" class="card-img-top object-fit-cover" alt="Dziecięca" style="height: 250px;">
-                <div class="card-body text-center">
+               <div class="card-body text-center">
                     <h3 class="card-title fw-bold mb-0">Odzież Dziecięca</h3>
-                    <a href="#" class="stretched-link"></a>
+                    <a href="index.php?page=category&id=13" class="stretched-link"></a>
                 </div>
             </div>
         </div>

@@ -1,77 +1,71 @@
 <?php
 ob_start();
 session_start();
+
 require_once '../src/Database.php';
 require_once '../src/ProductManager.php';
 require_once '../src/CategoryManager.php';
+require_once '../src/ReviewManager.php';
 require_once '../src/controllers/CategoryController.php';
 require_once '../src/controllers/ProductController.php';
 require_once '../src/controllers/CartController.php';
 require_once '../src/controllers/AuthController.php';
+require_once '../src/controllers/ReviewController.php';
 require_once '../src/helpers.php';
 
 $pdo = Database::getConnection();
 
+// --- INICJALIZACJA MENEDŻERÓW ---
 $productManager = new ProductManager($pdo);
 $categoryManager = new CategoryManager($pdo);
+$reviewManager = new ReviewManager($pdo);
 
-$page = $_GET['page'] ?? 'home';
-
-$allowedPages = ['home', 'category', 'cart', 'product', 'login', 'register', 'logout','profile','change-password'];
-
-if (!in_array($page, $allowedPages)) {
-    http_response_code(404);
-    $page = '404';
-}
-
-$rootCategories = $categoryManager->getRootCategories();
-$mainCategories = $categoryManager->getSubcategories($rootCategories[0]['id']);
-
-require_once '../views/partials/header.php';
-
-switch ($page) {
-    case 'home':
+// --- NOWOCZESNY SYSTEM ROUTINGU (MAPA ŚCIEŻEK) ---
+$routes = [
+    'home' => function() {
         require_once '../views/home.php';
-        break;
-
-    case 'category':
-        $controller = new CategoryController($categoryManager,$productManager);
+    },
+    'category' => function() use ($categoryManager, $productManager) {
+        $controller = new CategoryController($categoryManager, $productManager);
         $controller->show($_GET['id'] ?? null);
-        break;
-
-    case 'cart':
+    },
+    'cart' => function() use ($productManager) {
         $controller = new CartController($productManager);
         $controller->show();
-        break;
-
-    case 'product':
-        $controller = new ProductController($productManager);
+    },
+    'product' => function() use ($productManager, $reviewManager) {
+        $controller = new ProductController($productManager, $reviewManager);
         $controller->show($_GET['id'] ?? null);
-        break;
-
-    case 'login':
-        $authController = new AuthController($pdo);
-        $authController->showLogin();
-        break;
-
-    case 'logout':
-        $authController = new AuthController($pdo);
-        $authController->logout();
-        break;
-
-    case 'register':
-        $authController = new AuthController($pdo);
-        $authController->showRegister();
-        break;
-    case 'profile':
+    },
+    'login' => function() use ($pdo) {
+        $controller = new AuthController($pdo);
+        $controller->showLogin();
+    },
+    'logout' => function() use ($pdo) {
+        $controller = new AuthController($pdo);
+        $controller->logout();
+    },
+    'register' => function() use ($pdo) {
+        $controller = new AuthController($pdo);
+        $controller->showRegister();
+    },
+    'add_review' => function() use ($reviewManager) {
+        $controller = new ReviewController($reviewManager);
+        $controller->add();
+    },
+    'delete_review' => function() use ($reviewManager) {
+        $controller = new ReviewController($reviewManager);
+        $controller->delete();
+    },
+    'profile' => function() use ($pdo) {
         $authController = new AuthController($pdo);
         $authController->showProfile();
-        break;
-    case 'change-password':
-        $authController = new AuthController($pdo); 
+    },
+    'change-password' => function() use ($pdo) {
+        $authController = new AuthController($pdo);
         $authController->changePassword();
-        break;
-    case '404':
+    },
+    '404' => function() {
         echo "
         <div class='text-center py-5 my-5'>
             <h1 class='display-1 fw-bold text-muted'>404</h1>
@@ -80,11 +74,26 @@ switch ($page) {
             <a href='index.php?page=home' class='btn btn-primary btn-lg'>Wróć na stronę główną</a>
         </div>
         ";
-        break;
+    }
+];
 
-    default:
-        break;
+// --- LOGIKA WIDOKU GLOBALNEGO ---
+$page = $_GET['page'] ?? 'home';
+
+if (!array_key_exists($page,$routes)) {
+    http_response_code(404);
+    $page = '404';
 }
+
+// load categories - displayed in header
+$rootCategories = $categoryManager->getRootCategories();
+$firstRootCatId = !empty($rootCategories) ? $rootCategories[0]['id'] : null;
+$mainCategories = $firstRootCatId ? $categoryManager->getSubcategories($firstRootCatId) : [];
+
+// --- RENDEROWANIE STRONY ---
+require_once '../views/partials/header.php';
+
+$routes[$page]();
 
 require_once '../views/partials/footer.php';
 ?>
