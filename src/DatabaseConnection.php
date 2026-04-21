@@ -16,9 +16,9 @@ class DatabaseConnection {
                     PDO::ATTR_EMULATE_PREPARES   => false,
                 ]);
             } catch (PDOException $e) {
-                error_log("Error connecting to database: " . $e->getMessage());
-                http_response_code(500);
-                die("<h2>Przepraszamy, wystąpił błąd techniczny.</h2><p>Spróbuj ponownie później.</p>");
+                error_log("DB connection error: " . $e->getMessage());
+                
+                throw new Exception("Could not connect with database");
             }
         }
 

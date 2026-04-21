@@ -12,34 +12,48 @@ require_once '../src/controllers/AuthController.php';
 require_once '../src/controllers/ReviewController.php';
 require_once '../src/helpers.php';
 
-// database connection
-$pdo = DatabaseConnection::getConnection();
-
-// managers 
-$productManager = new ProductManager($pdo);
-$categoryManager = new CategoryManager($pdo);
-$reviewManager = new ReviewManager($pdo);
-
-// load routes table from config
-$routes = require_once "../config/routes.php";
+$pdo = null;
+$categoryManager = null;
+$productManager = null;
+$reviewManager = null;
+$rootCategories = [];
+$mainCategories = [];
 
 // global view logic
 $page = $_GET['page'] ?? 'home';
 
-if (!array_key_exists($page,$routes)) {
+try {
+    // 2. Próba połączenia i inicjalizacja managerów
+    $pdo = DatabaseConnection::getConnection();
+    
+    $categoryManager = new CategoryManager($pdo);
+    $productManager = new ProductManager($pdo);
+    $reviewManager = new ReviewManager($pdo);
+
+    // 3. Dane do nagłówka (wymagają bazy!)
+    $rootCategories = $categoryManager->getRootCategories();
+    $firstRootCatId = !empty($rootCategories) ? $rootCategories[0]['id'] : null;
+    $mainCategories = $firstRootCatId ? $categoryManager->getSubcategories($firstRootCatId) : [];
+
+} catch (Exception $e) {
+    error_log("CRITICAL ERROR" . $e->getMessage());
+    http_response_code(500);
+    $page = '500';
+}
+
+$routes = require_once "../config/routes.php";
+
+if ($page !== '500' && !array_key_exists($page,$routes)) {
     http_response_code(404);
     $page = '404';
 }
 
-// load categories - displayed in header
-$rootCategories = $categoryManager->getRootCategories();
-$firstRootCatId = !empty($rootCategories) ? $rootCategories[0]['id'] : null;
-$mainCategories = $firstRootCatId ? $categoryManager->getSubcategories($firstRootCatId) : [];
-
-// render page
-require_once '../views/partials/header.php';
-
-$routes[$page]();
-
-require_once '../views/partials/footer.php';
+if ($page === '500') {
+    $routes['500']();
+} else {
+     // render page
+    require_once '../views/partials/header.php';
+    $routes[$page]();
+    require_once '../views/partials/footer.php';
+}
 ?>

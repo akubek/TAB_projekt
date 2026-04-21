@@ -27,7 +27,7 @@ if (file_exists($envPath)) {
             $_ENV[$key] = $value;
         }
     } else {
-        die("CRITICAL ERROR: .env file is corruped or has wrong format!");
+        die("CRITICAL ERROR: .env file is corrupted or has wrong format!");
     }
 } else {
     // Bez tego pliku nie mamy haseł do bazy, więc nie ma sensu iść dalej

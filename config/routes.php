@@ -52,5 +52,14 @@ return [
             <a href='index.php?page=home' class='btn btn-primary btn-lg'>Wróć na stronę główną</a>
         </div>
         ";
+    },
+    '500' => function() {
+        echo "
+        <div class='text-center py-5 my-5'>
+            <h1 class='display-1 fw-bold text-danger'>500</h1>
+            <h2 class='mb-4'>Problem techniczny</h2>
+            <p class='lead mb-4'>Spróbuj ponownie później.</p>
+        </div>
+        ";
     }
 ];
