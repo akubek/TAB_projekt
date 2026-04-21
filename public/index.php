@@ -56,35 +56,44 @@ $routes = [
     'delete_review' => function() use ($reviewManager) {
         $controller = new ReviewController($reviewManager);
         $controller->delete();
+    },
+    'profile' => function() use ($pdo) {
+        $authController = new AuthController($pdo);
+        $authController->showProfile();
+    },
+    'change-password' => function() use ($pdo) {
+        $authController = new AuthController($pdo);
+        $authController->changePassword();
+    },
+    '404' => function() {
+        echo "
+        <div class='text-center py-5 my-5'>
+            <h1 class='display-1 fw-bold text-muted'>404</h1>
+            <h2 class='mb-4'>Oops! Strona nie znaleziona.</h2>
+            <p class='lead mb-4'>Wygląda na to, że zgubiłeś się w naszym sklepie.</p>
+            <a href='index.php?page=home' class='btn btn-primary btn-lg'>Wróć na stronę główną</a>
+        </div>
+        ";
     }
 ];
 
 // --- LOGIKA WIDOKU GLOBALNEGO ---
 $page = $_GET['page'] ?? 'home';
 
+if (!array_key_exists($page,$routes)) {
+    http_response_code(404);
+    $page = '404';
+}
+
+// load categories - displayed in header
 $rootCategories = $categoryManager->getRootCategories();
-// Zabezpieczenie na wypadek, gdyby tablica rootCategories była pusta
 $firstRootCatId = !empty($rootCategories) ? $rootCategories[0]['id'] : null;
 $mainCategories = $firstRootCatId ? $categoryManager->getSubcategories($firstRootCatId) : [];
 
 // --- RENDEROWANIE STRONY ---
 require_once '../views/partials/header.php';
 
-// Jeśli żądana strona istnieje w naszym słowniku, wywołaj jej funkcję
-if (array_key_exists($page, $routes)) {
-    $routes[$page]();
-} else {
-    // Jeśli nie ma - ładny błąd 404
-    http_response_code(404);
-    echo "
-    <div class='text-center py-5 my-5'>
-        <h1 class='display-1 fw-bold text-muted'>404</h1>
-        <h2 class='mb-4'>Oops! Strona nie znaleziona.</h2>
-        <p class='lead mb-4'>Wygląda na to, że zgubiłeś się w naszym sklepie.</p>
-        <a href='index.php?page=home' class='btn btn-primary btn-lg'>Wróć na stronę główną</a>
-    </div>
-    ";
-}
+$routes[$page]();
 
 require_once '../views/partials/footer.php';
 ?>
