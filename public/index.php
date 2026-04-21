@@ -17,7 +17,7 @@ $categoryManager = new CategoryManager($pdo);
 
 $page = $_GET['page'] ?? 'home';
 
-$allowedPages = ['home', 'category', 'cart', 'product', 'login', 'register', 'logout'];
+$allowedPages = ['home', 'category', 'cart', 'product', 'login', 'register', 'logout','profile','change-password'];
 
 if (!in_array($page, $allowedPages)) {
     http_response_code(404);
@@ -63,7 +63,14 @@ switch ($page) {
         $authController = new AuthController($pdo);
         $authController->showRegister();
         break;
-
+    case 'profile':
+        $authController = new AuthController($pdo);
+        $authController->showProfile();
+        break;
+    case 'change-password':
+        $authController = new AuthController($pdo); 
+        $authController->changePassword();
+        break;
     case '404':
         echo "
         <div class='text-center py-5 my-5'>
