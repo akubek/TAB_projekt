@@ -1,7 +1,7 @@
 <?php
 return [
     'home' => function() {
-        require_once '../views/home.php';
+        require_once BASE_PATH . '/views/home.php';
     },
     'category' => function() use ($categoryManager, $productManager) {
         $controller = new CategoryController($categoryManager, $productManager);

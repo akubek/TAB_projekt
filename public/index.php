@@ -1,16 +1,16 @@
 <?php
 // public/index.php
-require_once '../bootstrap/init.php';
-require_once '../src/DatabaseConnection.php';
-require_once '../src/ProductManager.php';
-require_once '../src/CategoryManager.php';
-require_once '../src/ReviewManager.php';
-require_once '../src/controllers/CategoryController.php';
-require_once '../src/controllers/ProductController.php';
-require_once '../src/controllers/CartController.php';
-require_once '../src/controllers/AuthController.php';
-require_once '../src/controllers/ReviewController.php';
-require_once '../src/helpers.php';
+require_once __DIR__ '/../bootstrap/init.php';
+require_once BASE_PATH . '/src/DatabaseConnection.php';
+require_once BASE_PATH . '/src/ProductManager.php';
+require_once BASE_PATH . '/src/CategoryManager.php';
+require_once BASE_PATH . '/src/ReviewManager.php';
+require_once BASE_PATH . '/src/controllers/CategoryController.php';
+require_once BASE_PATH . '/src/controllers/ProductController.php';
+require_once BASE_PATH . '/src/controllers/CartController.php';
+require_once BASE_PATH . '/src/controllers/AuthController.php';
+require_once BASE_PATH . '/src/controllers/ReviewController.php';
+require_once BASE_PATH . '/src/helpers.php';
 
 $pdo = null;
 $categoryManager = null;
@@ -41,7 +41,7 @@ try {
     $page = '500';
 }
 
-$routes = require_once "../config/routes.php";
+$routes = require_once BASE_PATH . "/config/routes.php";
 
 if ($page !== '500' && !array_key_exists($page,$routes)) {
     http_response_code(404);
@@ -52,8 +52,8 @@ if ($page === '500') {
     $routes['500']();
 } else {
      // render page
-    require_once '../views/partials/header.php';
+    require_once BASE_PATH . '/views/partials/header.php';
     $routes[$page]();
-    require_once '../views/partials/footer.php';
+    require_once BASE_PATH . '/views/partials/footer.php';
 }
 ?>

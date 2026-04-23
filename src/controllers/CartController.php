@@ -33,6 +33,6 @@ class CartController {
                 $totalPrice += $subtotal;
             }
         }
-        require_once '../views/cart.php';
+        require_once BASE_PATH . '/views/cart.php';
     }
 }

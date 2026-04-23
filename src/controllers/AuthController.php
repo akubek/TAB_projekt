@@ -56,7 +56,7 @@ class AuthController {
                 }
             }
         }
-        require_once '../views/register.php';
+        require_once BASE_PATH . '/views/register.php';
     }
 
     public function showLogin() {
@@ -94,7 +94,7 @@ class AuthController {
                 $login_error = "Nieprawidłowy format e-mail.";
             }
         }
-        require_once '../views/login.php';
+        require_once BASE_PATH . '/views/login.php';
     }
 
     public function logout() {
@@ -152,7 +152,7 @@ class AuthController {
                 }
             }
         }
-        require_once '../views/profile.php';
+        require_once BASE_PATH . '/views/profile.php';
     }
 
     public function changePassword() {

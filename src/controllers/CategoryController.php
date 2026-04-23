@@ -15,15 +15,15 @@ class CategoryController {
             $categoryPath = $this->categoryManager->getCategoryPath($categoryId);
             $subcategories = $this->categoryManager->getSubcategories($categoryId);
             
-            require_once '../views/partials/breadcrumb.php';
+            require_once BASE_PATH . '/views/partials/breadcrumb.php';
 
             if (!empty($subcategories)) {
                 $products = $this->productManager->getProductsByCategory($categoryId, 9, 'newest');
-                require_once '../views/category_list.php';
+                require_once BASE_PATH . '/views/category_list.php';
             } else {
                 $sort = $_GET['sort'] ?? 'newest';
                 $products = $this->productManager->getProductsByCategory($categoryId, null, $sort);
-                require_once '../views/product_list.php';
+                require_once BASE_PATH . '/views/product_list.php';
             }
         } else {
             echo "<div class='alert alert-danger'>Brak ID kategorii w adresie URL.</div>";

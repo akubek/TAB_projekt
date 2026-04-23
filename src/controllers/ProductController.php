@@ -23,7 +23,7 @@ class ProductController {
                     $hasReviewed = $this->reviewManager->hasUserReviewedProduct($_SESSION['user_id'], $productId);
                 }
 
-                require_once '../views/product_details.php';
+                require_once BASE_PATH . '/views/product_details.php';
             } else {
                 echo "<div class='alert alert-warning text-center mt-5'>Nie znaleziono takiego produktu.</div>";
             }
