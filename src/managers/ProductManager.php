@@ -111,16 +111,24 @@ class ProductManager
 
     public function searchProducts(string $phrase): array
     {
-        $searchTerm = "%{$phrase}%";
+        $cleanPhrase = preg_replace('/[^\p{L}\p{N}_]+/u', ' ', $phrase);
 
-        error_log("szukana fraza " . $searchTerm);
+        $words = array_filter(explode(' ', trim($cleanPhrase)));
+
+        if (empty($words)) {
+            return []; // Jeśli ktoś wpisał same znaki specjalne, od razu zwracamy pustą listę
+        }
+
+        $tsQueryParts = array_map(fn($w) => $w . ':*', $words);
+
+        $searchTerm = implode(' & ', $tsQueryParts);
 
         $sql = "SELECT p.*, c.name as category_name, parent.name as parent_category_name 
                 FROM products p
                 LEFT JOIN categories c ON p.category_id = c.id
                 LEFT JOIN categories parent ON c.parent_id = parent.id
-                WHERE p.name LIKE :phrase 
-                OR p.description LIKE :phrase
+                WHERE to_tsvector('simple', COALESCE(p.name, '') || ' ' || COALESCE(p.description, '')) 
+                        @@ to_tsquery('simple', :phrase)
                 ORDER BY p.created_at DESC";
 
         $stmt = $this->pdo->prepare($sql);

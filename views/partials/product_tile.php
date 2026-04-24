@@ -7,10 +7,14 @@
     <div class="card-body d-flex flex-column">
         <span class="small text-muted mb-1"><?= e($product['brand_name'] ?? 'Brak marki') ?></span>
         <h5 class="card-title text-truncate mb-2">
-            <a href="index.php?page=product&id=<?= $product['id'] ?>" class="text-decoration-none text-dark stretched-link">
+            <a href="index.php?page=product&id=<?= (int) $product['id'] ?>" class="text-decoration-none text-dark stretched-link">
                 <?= e($product['name']) ?>
             </a>
         </h5>
+
+        <p class="card-text text-muted small text-break line-clamp-3">
+            <?= e($product['description'] ?? 'Brak opisu') ?>
+        </p>
 
         <?php
         // 1. Opcjonalne ukrywanie badge'a (domyślnie pokazujemy)
