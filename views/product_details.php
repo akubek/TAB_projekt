@@ -11,16 +11,36 @@ require_once BASE_PATH . '/views/partials/breadcrumb.php';
         <h1><?= htmlspecialchars($product['name']) ?></h1>
         <h2 id="current-price" class="text-primary"><?= number_format($product['base_price'], 2) ?> zł</h2>
 
-        <div class="mt-4">
-            <h5>Wybierz wariant:</h5>
-            <select id="variant-selector" class="form-select">
-                <?php foreach ($product['variants'] as $variant):
-                    $attrs = json_decode($variant['attributes'], true); ?>
-                    <option value="<?= $variant['id'] ?>">
-                        <?= $attrs['size'] ?? '' ?> <?= $attrs['color'] ?? '' ?> (SKU: <?= $variant['sku'] ?>)
-                    </option>
-                <?php endforeach; ?>
-            </select>
+        <div class="mt-4" id="variant-selection-area">
+            <?php if (!empty($productAttrs['available_colors'])): ?>
+                <h5>Kolor: <span id="selected-color-label" class="text-muted fw-normal">Wybierz</span></h5>
+                <div class="d-flex gap-2 mb-3" id="color-selectors">
+                    <?php foreach ($productAttrs['available_colors'] as $colorKey):
+                        $colorData = $colorsDict[$colorKey] ?? ['name' => $colorKey, 'hex' => '#ccc'];
+                    ?>
+                        <button type="button" class="btn border border-secondary rounded-circle variant-btn color-btn p-0"
+                            style="width: 35px; height: 35px; background-color: <?= $colorData['hex'] ?>;"
+                            data-type="color"
+                            data-value="<?= $colorKey ?>"
+                            data-label="<?= $colorData['name'] ?>"
+                            title="<?= $colorData['name'] ?>">
+                        </button>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+
+            <?php if (!empty($productAttrs['available_sizes'])): ?>
+                <h5>Rozmiar: <span id="selected-size-label" class="text-muted fw-normal">Wybierz</span></h5>
+                <div class="d-flex gap-2 mb-3" id="size-selectors">
+                    <?php foreach ($productAttrs['available_sizes'] as $size): ?>
+                        <button type="button" class="btn btn-outline-secondary variant-btn size-btn"
+                            data-type="size"
+                            data-value="<?= $size ?>">
+                            <?= htmlspecialchars($size) ?>
+                        </button>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
         </div>
 
         <div class="mt-4">

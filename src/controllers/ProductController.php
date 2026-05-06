@@ -21,6 +21,8 @@ class ProductController
             if ($product) {
                 $reviews = $this->reviewManager->getReviewsByProductId($productId);
                 $ratingData = $this->reviewManager->getAverageRating($productId);
+                $productAttrs = json_decode($product['attributes'], true);
+                $colorsDict = require BASE_PATH . '/config/colors.php';
 
                 //create breadcrumb
                 $categoryPath = $this->categoryManager->getCategoryPath($product['category_id']);
@@ -43,10 +45,12 @@ class ProductController
                 }
                 renderView('product_details', [
                     'product' => $product,
+                    'productAttrs' => $productAttrs,
                     'reviews' => $reviews,
                     'ratingData' => $ratingData,
                     'hasReviewed' => $hasReviewed,
-                    'breadcrumbs' => $breadcrumbs
+                    'breadcrumbs' => $breadcrumbs,
+                    'colorsDict' => $colorsDict
                 ]);
             } else {
                 echo "<div class='alert alert-warning text-center mt-5'>Nie znaleziono takiego produktu.</div>";
