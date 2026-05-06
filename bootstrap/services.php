@@ -88,7 +88,7 @@ return [
         static $instance;
         if ($instance === null) {
             require_once BASE_PATH . '/src/controllers/ProductController.php';
-            $instance = new ProductController($c['productManager']($c), $c['reviewManager']($c));
+            $instance = new ProductController($c['productManager']($c), $c['reviewManager']($c), $c['categoryManager']($c));
         }
         return $instance;
     },

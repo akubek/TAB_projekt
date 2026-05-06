@@ -1,3 +1,6 @@
+<?php
+require_once BASE_PATH . '/views/partials/breadcrumb.php';
+?>
 <div class="row" id="product-container"
     data-variants='<?= json_encode($product['variants']) ?>'
     data-base-price='<?= $product['base_price'] ?>'>
