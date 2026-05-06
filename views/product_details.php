@@ -3,9 +3,21 @@ require_once BASE_PATH . '/views/partials/breadcrumb.php';
 ?>
 <div class="row" id="product-container"
     data-variants='<?= json_encode($product['variants']) ?>'
-    data-base-price='<?= $product['base_price'] ?>'>
-    <div class="col-md-6">
-        <img id="main-product-image" src="https://placehold.co/600x800" class="img-fluid" alt="">
+    data-base-price='<?= $product['base_price'] ?>'
+    data-main-image='<?= htmlspecialchars($product['main_image'] ?? 'https://placehold.co/600x800') ?>'>
+    <div class="col-md-6 mb-4 mb-md-0">
+        <div class="product-image-wrapper bg-light rounded shadow-sm d-flex justify-content-center align-items-center mb-3"
+            style="aspect-ratio: 3/4; overflow: hidden; width: 100%;">
+
+            <img id="main-product-image"
+                src="<?= htmlspecialchars($product['main_image'] ?? 'https://placehold.co/600x800') ?>"
+                alt="<?= htmlspecialchars($product['name']) ?>"
+                style="width: 100%; height: 100%; object-fit: cover; transition: opacity 0.2s ease-in-out;">
+        </div>
+
+        <div id="product-thumbnails" class="d-flex gap-2 overflow-x-auto pb-2 d-none" style="scrollbar-width: thin;">
+            //created in js
+        </div>
     </div>
     <div class="col-md-6">
         <h1><?= htmlspecialchars($product['name']) ?></h1>

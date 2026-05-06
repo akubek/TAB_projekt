@@ -13,7 +13,7 @@ class ProductManager
     public function getAllProducts()
     {
         $sql = "
-            SELECT p.id, p.name, p.base_price, c.name as category_name
+            SELECT p.*
             FROM products p
             JOIN categories c ON p.category_id = c.id
         ";

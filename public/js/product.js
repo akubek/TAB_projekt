@@ -3,8 +3,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!container) return;
 
     const variants = JSON.parse(container.dataset.variants);
+    const defaultMainImage = container.dataset.mainImage;
     const priceTag = document.getElementById('current-price');
     const imageTag = document.getElementById('main-product-image');
+    const thumbnailsContainer = document.getElementById('product-thumbnails');
     const stockTag = document.getElementById('stock-info');
     const addToCartBtn = document.getElementById('add-to-cart-btn');
 
@@ -12,6 +14,52 @@ document.addEventListener('DOMContentLoaded', () => {
     let selectedAttributes = { color: null, size: null };
     let currentMatchedVariantId = null; // Przechowujemy ID zamiast w ukrytym inpucie!
 
+    window.changeMainImage = function (src, clickedThumbElement) {
+        imageTag.style.opacity = 0.5;
+        setTimeout(() => {
+            imageTag.src = src;
+            imageTag.style.opacity = 1;
+        }, 150);
+
+        if (clickedThumbElement) {
+            document.querySelectorAll('.thumbnail-img').forEach(th => {
+                th.classList.remove('border-primary', 'border-2');
+                th.classList.add('border-light');
+            });
+            clickedThumbElement.classList.remove('border-light');
+            clickedThumbElement.classList.add('border-primary', 'border-2');
+        }
+    };
+
+    function renderGallery(imagesArray) {
+        if (!thumbnailsContainer) return;
+        thumbnailsContainer.innerHTML = '';
+
+        if (!imagesArray || imagesArray.length === 0) {
+            imagesArray = [defaultMainImage];
+        }
+
+        changeMainImage(imagesArray[0], null);
+
+        if (imagesArray.length > 1) {
+            thumbnailsContainer.classList.remove('d-none');
+
+            imagesArray.forEach((imgSrc, index) => {
+                const img = document.createElement('img');
+                img.src = imgSrc;
+                img.className = `img-thumbnail thumbnail-img ${index === 0 ? 'border-primary border-2' : 'border-light'}`;
+                img.style.cssText = 'width: 80px; height: 80px; object-fit: cover; cursor: pointer; flex-shrink: 0; transition: border-color 0.2s;';
+
+                img.addEventListener('click', function () {
+                    changeMainImage(imgSrc, this);
+                });
+
+                thumbnailsContainer.appendChild(img);
+            });
+        } else {
+            thumbnailsContainer.classList.add('d-none');
+        }
+    }
     // 1. ODCZYTYWANIE URL
     const urlParams = new URLSearchParams(window.location.search);
     const preselectedVariantId = urlParams.get('variant');
@@ -73,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
             priceTag.innerText = (basePrice + parseFloat(matchedVariant.price_modifier)).toFixed(2) + ' zł';
 
             const images = JSON.parse(matchedVariant.images);
-            if (images && images.length > 0) imageTag.src = images[0];
+            renderGallery(images);
 
             stockTag.innerText = `Dostępność: ${matchedVariant.stock_quantity} szt.`;
             stockTag.className = "text-success fw-bold mt-2 mb-2";
@@ -85,6 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
             stockTag.innerText = "Ten wariant jest obecnie niedostępny";
             stockTag.className = "text-danger fw-bold mt-2 mb-2";
             addToCartBtn.disabled = true;
+            renderGallery([defaultMainImage]);
         }
     }
 
