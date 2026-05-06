@@ -25,15 +25,19 @@
                                 <?php foreach ($items as $item): ?>
                                     <tr data-variant-id="<?= $item['variant_id'] ?>" data-price="<?= $item['unit_price'] ?>" data-stock="<?= $item['stock'] ?>">
                                         <td>
-                                            <div class="d-flex align-items-center">
-                                                <img src="<?= $item['image'] ?>" class="rounded me-3" style="width: 60px; height: 60px; object-fit: cover;">
+                                            <a href="index.php?page=product&id=<?= $item['product_id'] ?>&variant=<?= $item['variant_id'] ?>"
+                                                class="d-flex align-items-center text-decoration-none text-dark product-cart-link">
+
+                                                <img src="<?= $item['image'] ?>" class="rounded me-3 shadow-sm" style="width: 60px; height: 60px; object-fit: cover;">
+
                                                 <div>
-                                                    <div class="fw-bold"><?= htmlspecialchars($item['name']) ?></div>
+                                                    <div class="fw-bold product-name-hover"><?= htmlspecialchars($item['name']) ?></div>
                                                     <small class="text-muted">
                                                         <?= implode(', ', array_map(fn($k, $v) => "$k: $v", array_keys($item['attributes']), $item['attributes'])) ?>
                                                     </small>
                                                 </div>
-                                            </div>
+
+                                            </a>
                                         </td>
                                         <td><?= number_format($item['unit_price'], 2, ',', ' ') ?> zł</td>
                                         <td>
@@ -55,7 +59,7 @@
                 </div>
                 <button class="btn btn-outline-danger" id="clear-cart">Opróżnij koszyk</button>
             </div>
-            
+
             <div class="col-lg-4">
                 <div class="card shadow-sm border-0 p-4">
                     <h5 class="mb-4">Podsumowanie</h5>

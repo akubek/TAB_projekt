@@ -25,6 +25,7 @@ class CartController
 
                 $items[] = [
                     'variant_id' => $v['variant_id'],
+                    'product_id' => $v['product_id'],
                     'name' => $v['product_name'],
                     'attributes' => json_decode($v['attributes'], true),
                     'image' => json_decode($v['images'], true)[0] ?? 'https://placehold.co/100x100',
