@@ -34,7 +34,6 @@
 
         <div class="mt-auto d-flex justify-content-between align-items-center">
             <span class="fs-5 fw-bold text-primary"><?= number_format($product['base_price'], 2, ',', ' ') ?> zł</span>
-            <button class="btn btn-sm btn-outline-primary position-relative z-3">Do koszyka</button>
         </div>
     </div>
 </div>

@@ -1,23 +1,58 @@
+<?php
+require_once BASE_PATH . '/views/partials/breadcrumb.php';
+?>
 <div class="row" id="product-container"
-    data-variants='<?= json_encode($product['variants']) ?>'
-    data-base-price='<?= $product['base_price'] ?>'>
-    <div class="col-md-6">
-        <img id="main-product-image" src="https://placehold.co/600x800" class="img-fluid" alt="">
+    data-variants='<?= e(json_encode($product['variants'])) ?>'
+    data-base-price='<?= e($product['base_price']) ?>'
+    data-main-image='<?= e($product['main_image'] ?? 'https://placehold.co/600x800') ?>'>
+    <div class="col-md-6 mb-4 mb-md-0">
+        <div class="product-image-wrapper bg-light rounded shadow-sm d-flex justify-content-center align-items-center mb-3"
+            style="aspect-ratio: 3/4; overflow: hidden; width: 100%;">
+
+            <img id="main-product-image"
+                src="<?= e($product['main_image'] ?? 'https://placehold.co/600x800') ?>"
+                alt="<?= e($product['name']) ?>"
+                style="width: 100%; height: 100%; object-fit: cover; transition: opacity 0.2s ease-in-out;">
+        </div>
+
+        <div id="product-thumbnails" class="d-flex gap-2 overflow-x-auto pb-2 d-none" style="scrollbar-width: thin;">
+            <!--created in js -->
+        </div>
     </div>
     <div class="col-md-6">
-        <h1><?= htmlspecialchars($product['name']) ?></h1>
+        <h1><?= e($product['name']) ?></h1>
         <h2 id="current-price" class="text-primary"><?= number_format($product['base_price'], 2) ?> zł</h2>
 
-        <div class="mt-4">
-            <h5>Wybierz wariant:</h5>
-            <select id="variant-selector" class="form-select">
-                <?php foreach ($product['variants'] as $variant):
-                    $attrs = json_decode($variant['attributes'], true); ?>
-                    <option value="<?= $variant['id'] ?>">
-                        <?= $attrs['size'] ?? '' ?> <?= $attrs['color'] ?? '' ?> (SKU: <?= $variant['sku'] ?>)
-                    </option>
-                <?php endforeach; ?>
-            </select>
+        <div class="mt-4" id="variant-selection-area">
+            <?php if (!empty($productAttrs['available_colors'])): ?>
+                <h5>Kolor: <span id="selected-color-label" class="text-muted fw-normal">Wybierz</span></h5>
+                <div class="d-flex gap-2 mb-3" id="color-selectors">
+                    <?php foreach ($productAttrs['available_colors'] as $colorKey):
+                        $colorData = $colorsDict[$colorKey] ?? ['name' => $colorKey, 'hex' => '#ccc'];
+                    ?>
+                        <button type="button" class="btn border border-secondary rounded-circle variant-btn color-btn p-0"
+                            style="width: 35px; height: 35px; background-color: <?= e($colorData['hex']) ?>;"
+                            data-type="color"
+                            data-value="<?= e($colorKey) ?>"
+                            data-label="<?= e($colorData['name']) ?>"
+                            title="<?= e($colorData['name']) ?>">
+                        </button>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+
+            <?php if (!empty($productAttrs['available_sizes'])): ?>
+                <h5>Rozmiar: <span id="selected-size-label" class="text-muted fw-normal">Wybierz</span></h5>
+                <div class="d-flex gap-2 mb-3" id="size-selectors">
+                    <?php foreach ($productAttrs['available_sizes'] as $size): ?>
+                        <button type="button" class="btn btn-outline-secondary variant-btn size-btn"
+                            data-type="size"
+                            data-value="<?= e($size) ?>">
+                            <?= e($size) ?>
+                        </button>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
         </div>
 
         <div class="mt-4">

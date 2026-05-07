@@ -1,42 +1,175 @@
 document.addEventListener('DOMContentLoaded', () => {
     const container = document.getElementById('product-container');
-
-    // check if this is the product-container page 
     if (!container) return;
 
     const variants = JSON.parse(container.dataset.variants);
-    const selector = document.getElementById('variant-selector');
+    const defaultMainImage = container.dataset.mainImage;
     const priceTag = document.getElementById('current-price');
     const imageTag = document.getElementById('main-product-image');
+    const thumbnailsContainer = document.getElementById('product-thumbnails');
     const stockTag = document.getElementById('stock-info');
     const addToCartBtn = document.getElementById('add-to-cart-btn');
 
+    // NASZ "STAN" (State)
+    let selectedAttributes = { color: null, size: null };
+    let currentMatchedVariantId = null; // Przechowujemy ID zamiast w ukrytym inpucie!
 
-    // handle variant change (image, price modifier, inventory) 
-    selector.addEventListener('change', (e) => {
-        const variantId = e.target.value;
-        const variant = variants.find(v => v.id == variantId);
+    window.changeMainImage = function (src, clickedThumbElement) {
+        imageTag.style.opacity = 0.5;
+        setTimeout(() => {
+            imageTag.src = src;
+            imageTag.style.opacity = 1;
+        }, 150);
 
-        if (variant) {
-            const basePrice = parseFloat(container.dataset.basePrice || 0);
-            console.log(basePrice);
-            priceTag.innerText = (basePrice + parseFloat(variant.price_modifier)).toFixed(2) + ' zł';
-
-            const images = JSON.parse(variant.images);
-            if (images.length > 0) imageTag.src = images[0];
-
-            stockTag.innerText = `Dostępność: ${variant.stock_quantity} szt.`;
-            addToCartBtn.disabled = variant.stock_quantity <= 0;
+        if (clickedThumbElement) {
+            document.querySelectorAll('.thumbnail-img').forEach(th => {
+                th.classList.remove('border-primary', 'border-2');
+                th.classList.add('border-light');
+            });
+            clickedThumbElement.classList.remove('border-light');
+            clickedThumbElement.classList.add('border-primary', 'border-2');
         }
+    };
+
+    function renderGallery(imagesArray) {
+        if (!thumbnailsContainer) return;
+        thumbnailsContainer.innerHTML = '';
+
+        if (!imagesArray || imagesArray.length === 0) {
+            imagesArray = [defaultMainImage];
+        }
+
+        changeMainImage(imagesArray[0], null);
+
+        if (imagesArray.length > 1) {
+            thumbnailsContainer.classList.remove('d-none');
+
+            imagesArray.forEach((imgSrc, index) => {
+                const img = document.createElement('img');
+                img.src = imgSrc;
+                img.className = `img-thumbnail thumbnail-img ${index === 0 ? 'border-primary border-2' : 'border-light'}`;
+                img.style.cssText = 'width: 80px; height: 80px; object-fit: cover; cursor: pointer; flex-shrink: 0; transition: border-color 0.2s;';
+
+                img.addEventListener('click', function () {
+                    changeMainImage(imgSrc, this);
+                });
+
+                thumbnailsContainer.appendChild(img);
+            });
+        } else {
+            thumbnailsContainer.classList.add('d-none');
+        }
+    }
+    // 1. ODCZYTYWANIE URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const preselectedVariantId = urlParams.get('variant');
+
+    if (preselectedVariantId) {
+        const targetVariant = variants.find(v => v.id == preselectedVariantId);
+        if (targetVariant) {
+            const attrs = JSON.parse(targetVariant.attributes);
+            if (attrs.color && attrs.color.key) selectedAttributes.color = attrs.color.key;
+            else if (attrs.color) selectedAttributes.color = attrs.color;
+            if (attrs.size) selectedAttributes.size = attrs.size;
+        }
+    }
+
+    // 2. KLIKANIE CECH (UI)
+    document.querySelectorAll('.variant-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const type = this.dataset.type;
+            const val = this.dataset.value;
+
+            document.querySelectorAll(`.${type}-btn`).forEach(b => {
+                b.classList.remove('border-dark', 'border-3', 'active');
+                if (b.classList.contains('btn-secondary')) {
+                    b.classList.remove('btn-secondary', 'text-white');
+                    b.classList.add('btn-outline-secondary');
+                }
+            });
+
+            if (type === 'color') {
+                this.classList.add('border-dark', 'border-3');
+            } else {
+                this.classList.remove('btn-outline-secondary');
+                this.classList.add('btn-secondary', 'text-white');
+            }
+
+            const label = this.dataset.label || val;
+            document.getElementById(`selected-${type}-label`).innerText = label;
+
+            selectedAttributes[type] = val;
+            checkVariantMatch();
+        });
     });
 
-    // load first variant in the list 
-    selector.dispatchEvent(new Event('change'));
+    // 3. WYSZUKIWANIE WARIANTU I AKTUALIZACJA "STANU"
+    const requiresColor = document.querySelectorAll('.color-btn').length > 0;
+    const requiresSize = document.querySelectorAll('.size-btn').length > 0;
 
-    // add varinat to cart 
+    function checkVariantMatch() {
+        if (requiresColor && !selectedAttributes.color) return;
+        if (requiresSize && !selectedAttributes.size) return;
+
+        const matchedVariant = variants.find(v => {
+            const attrs = JSON.parse(v.attributes);
+            let isMatch = true;
+
+            if (requiresColor) {
+                const jsonColor = (attrs.color && attrs.color.key) ? attrs.color.key : attrs.color;
+                if (jsonColor !== selectedAttributes.color) isMatch = false;
+            }
+
+            if (requiresSize) {
+                if (attrs.size !== selectedAttributes.size) isMatch = false;
+            }
+
+            return isMatch;
+        })
+
+        if (matchedVariant) {
+            // ZAPISUJEMY DO ZMIENNEJ W JS
+            currentMatchedVariantId = matchedVariant.id;
+
+            const basePrice = parseFloat(container.dataset.basePrice || 0);
+            priceTag.innerText = (basePrice + parseFloat(matchedVariant.price_modifier)).toFixed(2) + ' zł';
+
+            const images = JSON.parse(matchedVariant.images);
+            renderGallery(images);
+
+            stockTag.innerText = `Dostępność: ${matchedVariant.stock_quantity} szt.`;
+            stockTag.className = "text-success fw-bold mt-2 mb-2";
+            addToCartBtn.disabled = matchedVariant.stock_quantity <= 0;
+
+        } else {
+            // RESETUJEMY ZMIENNĄ
+            currentMatchedVariantId = null;
+            stockTag.innerText = "Ten wariant jest obecnie niedostępny";
+            stockTag.className = "text-danger fw-bold mt-2 mb-2";
+            addToCartBtn.disabled = true;
+            renderGallery([defaultMainImage]);
+        }
+    }
+
+    // 4. SYMULACJA KLIKNIĘĆ Z URL
+    if (selectedAttributes.color) {
+        const colorBtn = document.querySelector(`.color-btn[data-value="${selectedAttributes.color}"]`);
+        if (colorBtn) colorBtn.click();
+    }
+    if (selectedAttributes.size) {
+        const sizeBtn = document.querySelector(`.size-btn[data-value="${selectedAttributes.size}"]`);
+        if (sizeBtn) sizeBtn.click();
+    }
+
+    // 5. DODAWANIE DO KOSZYKA Z UŻYCIEM ZMIENNEJ
     addToCartBtn.addEventListener('click', () => {
-        const variantId = selector.value;
-        if (!variantId) return;
+        // Bierzemy ID prosto ze zmiennej JS, a nie z HTML!
+        const variantId = currentMatchedVariantId;
+
+        if (!variantId) {
+            alert('Proszę upewnić się, że wybrany wariant jest dostępny.');
+            return;
+        }
 
         let cart = {};
         const currentCookie = getCookie('cart');
@@ -56,7 +189,6 @@ document.addEventListener('DOMContentLoaded', () => {
         setCookie('cart', JSON.stringify(cart), 7);
         updateCartBadge();
 
-        // button effect on adding item 
         const originalText = addToCartBtn.innerText;
         addToCartBtn.innerText = "Dodano!";
         addToCartBtn.classList.add('btn-success');

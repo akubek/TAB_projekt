@@ -17,11 +17,29 @@ class CategoryController
             $categoryPath = $this->categoryManager->getCategoryPath($categoryId);
             $subcategories = $this->categoryManager->getSubCategories($categoryId);
 
+            $breadcrumbs = [
+                ['name' => 'Strona Główna', 'url' => 'index.php?page=home']
+            ];
+
+            if (!empty($categoryPath)) {
+                foreach ($categoryPath as $index => $step) {
+                    $isLast = ($index === count($categoryPath) - 1); //check if last elsement
+
+                    $breadcrumbs[] = [
+                        'name' => $step['name'],
+                        // if last element don't add link (this is the element page)
+                        'url'  => $isLast ? null : 'index.php?page=category&id=' . $step['id']
+                    ];
+                }
+            }
+
+            // if this category has subcategories display them
+            // otherwise display products list
             if (!empty($subcategories)) {
                 $products = $this->productManager->getProductsByCategory($categoryId, 9, 'newest');
                 renderView('category_list', [
                     'currentCategory' => $currentCategory,
-                    'categoryPath'    => $categoryPath,
+                    'breadcrumbs'     => $breadcrumbs,
                     'subcategories'   => $subcategories,
                     'products'        => $products
                 ]);
@@ -30,9 +48,9 @@ class CategoryController
                 $products = $this->productManager->getProductsByCategory($categoryId, null, $sort);
                 renderView('product_list', [
                     'currentCategory' => $currentCategory,
-                    'categoryPath'    => $categoryPath,
+                    'breadcrumbs'     => $breadcrumbs,
                     'products'        => $products,
-                    'sort'           => $sort
+                    'sort'            => $sort
                 ]);
             }
         } else {

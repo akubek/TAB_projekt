@@ -13,7 +13,7 @@ class ProductManager
     public function getAllProducts()
     {
         $sql = "
-            SELECT p.id, p.name, p.base_price, c.name as category_name
+            SELECT p.* , c.name as category_name
             FROM products p
             JOIN categories c ON p.category_id = c.id
         ";
@@ -90,7 +90,7 @@ class ProductManager
         $placeholders = implode(',', array_fill(0, count($variantIds), '?'));
         $sql = "
             SELECT 
-                pv.id as variant_id, pv.sku, pv.attributes, pv.images, 
+                pv.id as variant_id, pv.product_id, pv.sku, pv.attributes, pv.images, 
                 pv.price_modifier, pv.stock_quantity,
                 p.name as product_name, p.base_price
             FROM product_variants pv

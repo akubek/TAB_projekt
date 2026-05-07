@@ -64,6 +64,7 @@ CREATE TABLE products (
     name VARCHAR(255) NOT NULL,
     description TEXT,
     brand_name VARCHAR(100),
+    main_image TEXT,
     category_id INT NOT NULL REFERENCES categories(id) ON DELETE RESTRICT,
     base_price DECIMAL(10,2) NOT NULL CHECK (base_price >= 0),
     attributes JSONB DEFAULT '{}'::jsonb,

@@ -28,3 +28,15 @@ footer a.text-light:hover {
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
+
+/* Lekkie rozjaśnienie obrazka po najechaniu na cały blok */
+.product-cart-link:hover img {
+    opacity: 0.85;
+    transition: opacity 0.2s ease-in-out;
+}
+
+/* Zmiana koloru nazwy produktu na kolor główny (np. niebieski) po najechaniu */
+.product-cart-link:hover .product-name-hover {
+    color: #0d6efd; /* Tu wpisz swój główny kolor motywu (primary) */
+    transition: color 0.2s ease-in-out;
+}
