@@ -25,15 +25,15 @@
                                 <?php foreach ($items as $item): ?>
                                     <tr data-variant-id="<?= $item['variant_id'] ?>" data-price="<?= $item['unit_price'] ?>" data-stock="<?= $item['stock'] ?>">
                                         <td>
-                                            <a href="index.php?page=product&id=<?= $item['product_id'] ?>&variant=<?= $item['variant_id'] ?>"
+                                            <a href="index.php?page=product&id=<?= (int)$item['product_id'] ?>&variant=<?= (int)$item['variant_id'] ?>"
                                                 class="d-flex align-items-center text-decoration-none text-dark product-cart-link">
 
-                                                <img src="<?= $item['image'] ?>" class="rounded me-3 shadow-sm" style="width: 60px; height: 60px; object-fit: cover;">
+                                                <img src="<?= e($item['image']) ?>" class="rounded me-3 shadow-sm" style="width: 60px; height: 60px; object-fit: cover;">
 
                                                 <div>
-                                                    <div class="fw-bold product-name-hover"><?= htmlspecialchars($item['name']) ?></div>
+                                                    <div class="fw-bold product-name-hover"><?= e($item['name']) ?></div>
                                                     <small class="text-muted">
-                                                        <?= implode(', ', array_map(fn($k, $v) => "$k: $v", array_keys($item['attributes']), $item['attributes'])) ?>
+                                                        <?= implode(', ', array_map(fn($k, $v) => e($k) . ': ' . e($v), array_keys($item['attributes']), $item['attributes'])) ?>
                                                     </small>
                                                 </div>
 

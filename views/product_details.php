@@ -2,25 +2,25 @@
 require_once BASE_PATH . '/views/partials/breadcrumb.php';
 ?>
 <div class="row" id="product-container"
-    data-variants='<?= json_encode($product['variants']) ?>'
-    data-base-price='<?= $product['base_price'] ?>'
-    data-main-image='<?= htmlspecialchars($product['main_image'] ?? 'https://placehold.co/600x800') ?>'>
+    data-variants='<?= e(json_encode($product['variants'])) ?>'
+    data-base-price='<?= e($product['base_price']) ?>'
+    data-main-image='<?= e($product['main_image'] ?? 'https://placehold.co/600x800') ?>'>
     <div class="col-md-6 mb-4 mb-md-0">
         <div class="product-image-wrapper bg-light rounded shadow-sm d-flex justify-content-center align-items-center mb-3"
             style="aspect-ratio: 3/4; overflow: hidden; width: 100%;">
 
             <img id="main-product-image"
-                src="<?= htmlspecialchars($product['main_image'] ?? 'https://placehold.co/600x800') ?>"
-                alt="<?= htmlspecialchars($product['name']) ?>"
+                src="<?= e($product['main_image'] ?? 'https://placehold.co/600x800') ?>"
+                alt="<?= e($product['name']) ?>"
                 style="width: 100%; height: 100%; object-fit: cover; transition: opacity 0.2s ease-in-out;">
         </div>
 
         <div id="product-thumbnails" class="d-flex gap-2 overflow-x-auto pb-2 d-none" style="scrollbar-width: thin;">
-            //created in js
+            <!--created in js -->
         </div>
     </div>
     <div class="col-md-6">
-        <h1><?= htmlspecialchars($product['name']) ?></h1>
+        <h1><?= e($product['name']) ?></h1>
         <h2 id="current-price" class="text-primary"><?= number_format($product['base_price'], 2) ?> zł</h2>
 
         <div class="mt-4" id="variant-selection-area">
@@ -31,11 +31,11 @@ require_once BASE_PATH . '/views/partials/breadcrumb.php';
                         $colorData = $colorsDict[$colorKey] ?? ['name' => $colorKey, 'hex' => '#ccc'];
                     ?>
                         <button type="button" class="btn border border-secondary rounded-circle variant-btn color-btn p-0"
-                            style="width: 35px; height: 35px; background-color: <?= $colorData['hex'] ?>;"
+                            style="width: 35px; height: 35px; background-color: <?= e($colorData['hex']) ?>;"
                             data-type="color"
-                            data-value="<?= $colorKey ?>"
-                            data-label="<?= $colorData['name'] ?>"
-                            title="<?= $colorData['name'] ?>">
+                            data-value="<?= e($colorKey) ?>"
+                            data-label="<?= e($colorData['name']) ?>"
+                            title="<?= e($colorData['name']) ?>">
                         </button>
                     <?php endforeach; ?>
                 </div>
@@ -47,8 +47,8 @@ require_once BASE_PATH . '/views/partials/breadcrumb.php';
                     <?php foreach ($productAttrs['available_sizes'] as $size): ?>
                         <button type="button" class="btn btn-outline-secondary variant-btn size-btn"
                             data-type="size"
-                            data-value="<?= $size ?>">
-                            <?= htmlspecialchars($size) ?>
+                            data-value="<?= e($size) ?>">
+                            <?= e($size) ?>
                         </button>
                     <?php endforeach; ?>
                 </div>

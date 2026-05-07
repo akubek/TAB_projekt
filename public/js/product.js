@@ -104,14 +104,28 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 3. WYSZUKIWANIE WARIANTU I AKTUALIZACJA "STANU"
+    const requiresColor = document.querySelectorAll('.color-btn').length > 0;
+    const requiresSize = document.querySelectorAll('.size-btn').length > 0;
+
     function checkVariantMatch() {
-        if (!selectedAttributes.color || !selectedAttributes.size) return;
+        if (requiresColor && !selectedAttributes.color) return;
+        if (requiresSize && !selectedAttributes.size) return;
 
         const matchedVariant = variants.find(v => {
             const attrs = JSON.parse(v.attributes);
-            const jsonColor = (attrs.color && attrs.color.key) ? attrs.color.key : attrs.color;
-            return jsonColor === selectedAttributes.color && attrs.size === selectedAttributes.size;
-        });
+            let isMatch = true;
+
+            if (requiresColor) {
+                const jsonColor = (attrs.color && attrs.color.key) ? attrs.color.key : attrs.color;
+                if (jsonColor !== selectedAttributes.color) isMatch = false;
+            }
+
+            if (requiresSize) {
+                if (attrs.size !== selectedAttributes.size) isMatch = false;
+            }
+
+            return isMatch;
+        })
 
         if (matchedVariant) {
             // ZAPISUJEMY DO ZMIENNEJ W JS
