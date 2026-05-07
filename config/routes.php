@@ -18,8 +18,12 @@ return [
     'change-password'   => fn($c) => $c['authController']($c)->changePassword(),
 
     // Recenzje
-    'add_review'      => fn($c) => $c['reviewController']($c)->add(),
-    'delete_review'   => fn($c) => $c['reviewController']($c)->delete(),
+    'add_review'        => fn($c) => $c['reviewController']($c)->add(),
+    'delete_review'     => fn($c) => $c['reviewController']($c)->delete(),
+
+    // Checkout
+    'checkout_start'    => fn($c) => $c['checkoutController']($c)->start(),
+    'checkout_form'     => fn($c) => $c['checkoutController']($c)->showForm(),
 
     // Obsługa błędów (przez ErrorController)
     '403' => fn($c) => $c['errorController']($c)->forbidden(),

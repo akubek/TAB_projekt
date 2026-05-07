@@ -5,13 +5,13 @@ function setCookie(name, value, days) {
         date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
         expires = "; expires=" + date.toUTCString();
     }
-    document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+    document.cookie = name + "=" + (value || "") + expires + "; path=/";
 }
 
 function getCookie(name) {
     let nameEQ = name + "=";
     let ca = document.cookie.split(';');
-    for(let i = 0; i < ca.length; i++) {
+    for (let i = 0; i < ca.length; i++) {
         let c = ca[i];
         while (c.charAt(0) == ' ') c = c.substring(1, c.length);
         if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
@@ -23,7 +23,7 @@ function getCookie(name) {
 function updateCartBadge() {
     const cartCookie = getCookie('cart');
     let totalItems = 0;
-    
+
     if (cartCookie) {
         try {
             const cart = JSON.parse(cartCookie);
@@ -39,7 +39,7 @@ function updateCartBadge() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {    
+document.addEventListener('DOMContentLoaded', () => {
     // after reloading page update the cart badge 
     updateCartBadge();
 });
