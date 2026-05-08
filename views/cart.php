@@ -76,7 +76,7 @@
                         <span>Łącznie</span>
                         <span id="cart-grand-total"><?= number_format($totalPrice, 2, ',', ' ') ?> zł</span>
                     </div>
-                    <a href="index.php?page=checkout" class="btn btn-primary btn-lg w-100">Przejdź do kasy</a>
+                    <a href="index.php?page=checkout_start" class="btn btn-primary btn-lg w-100">Przejdź do kasy</a>
                 </div>
             </div>
         </div>

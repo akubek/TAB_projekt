@@ -1,6 +1,13 @@
 ﻿<?php
 class AuthController
 {
+    private const ALLOWED_REDIRECTS = [
+        'checkout_form',
+        'cart',
+        'profile',
+        'home'
+    ];
+
     private $pdo;
 
     public function __construct($pdo)
@@ -12,6 +19,10 @@ class AuthController
     {
         $error_message = '';
         $success_message = '';
+
+        if (isset($_GET['redirect']) && in_array($_GET['redirect'], self::ALLOWED_REDIRECTS)) {
+            $_SESSION['intended_redirect'] = $_GET['redirect'];
+        }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $firstName = trim($_POST['first_name'] ?? '');
@@ -72,6 +83,10 @@ class AuthController
         $success_message = $_SESSION['flash_success'] ?? '';
         unset($_SESSION['flash_success']);
 
+        if (isset($_GET['redirect']) && in_array($_GET['redirect'], self::ALLOWED_REDIRECTS)) {
+            $_SESSION['intended_redirect'] = $_GET['redirect'];
+        }
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $email = strtolower(trim($_POST['email'] ?? ''));
             $password = $_POST['password'] ?? '';
@@ -91,8 +106,11 @@ class AuthController
                     $_SESSION['role'] = $user['role'];
                     $_SESSION['first_name'] = $user['first_name'];
 
-                    // redirect to main page
-                    header("Location: index.php?page=home");
+                    // redirect back to intended page or main page
+                    $targetPage = $_SESSION['intended_redirect'] ?? 'home';
+                    unset($_SESSION['intended_redirect']); // bardzo ważne czyszczenie!
+
+                    header("Location: index.php?page=" . $targetPage);
                     exit;
                 } else {
                     $login_error = "Nieprawidłowy adres e-mail lub hasło.";

@@ -2,16 +2,31 @@
 // public/index.php
 require_once __DIR__ . '/../bootstrap/init.php';
 
+// --- GUARD: Szybkie odrzucenie brakujących plików statycznych ---
+$requestPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+if (preg_match('/\.(?:png|jpg|jpeg|gif|css|js|ico|woff2?)$/i', $requestPath)) {
+    http_response_code(404);
+    exit;
+}
+
 try {
     //prepare structures, container with data that is injected, and routes to map pages to actions
     $container = require_once BASE_PATH . '/bootstrap/services.php';
     $routes = require_once BASE_PATH . '/config/routes.php';
 
     $page = $_GET['page'] ?? 'home';
+
     // check if page exitsts
     if (!array_key_exists($page, $routes)) {
         $page = '404';
     }
+
+    // clean intent if necessary
+    $authPages = ['login', 'register', 'checkout_start'];
+    if (!in_array($page, $authPages) && isset($_SESSION['intended_redirect'])) {
+        unset($_SESSION['intended_redirect']);
+    }
+
     $routes[$page]($container);
 } catch (Throwable $e) { // thorwable to catch everything
     while (ob_get_level() > 0) {

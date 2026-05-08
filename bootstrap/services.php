@@ -66,6 +66,15 @@ return [
         return $instance;
     },
 
+    'checkoutController' => function ($c) {
+        static $instance;
+        if ($instance === null) {
+            require_once BASE_PATH . '/src/controllers/CheckoutController.php';
+            $instance = new CheckoutController();
+        }
+        return $instance;
+    },
+
     'categoryController' => function ($c) {
         static $instance;
         if ($instance === null) {

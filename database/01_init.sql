@@ -18,7 +18,7 @@ DROP TYPE IF EXISTS discount_type_enum CASCADE;
 
 -- Enums
 CREATE TYPE gender_type AS ENUM ('M', 'F', 'OTHER');
-CREATE TYPE user_role_type AS ENUM ('CLIENT', 'EMPLOYEE', 'MANAGER');
+CREATE TYPE user_role_type AS ENUM ('CLIENT', 'EMPLOYEE', 'MANAGER', 'GUEST');
 CREATE TYPE discount_type_enum AS ENUM ('PERCENTAGE', 'FIXED_AMOUNT');
 
 
@@ -31,7 +31,7 @@ CREATE TABLE users (
     last_name VARCHAR(100),
     birth_date DATE,
     gender gender_type,
-    address JSONB,
+    addresses JSONB,
     phone_number VARCHAR(20),
     role user_role_type NOT NULL DEFAULT 'CLIENT',
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
