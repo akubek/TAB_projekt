@@ -14,9 +14,9 @@
                     <p class="card-text text-muted mb-4">Zaloguj się, aby szybciej złożyć zamówienie korzystając z zapisanych adresów.</p>
 
                     <div class="d-grid gap-2">
-                        <!-- redirect=checkout, aby AuthController wiedział, gdzie wrócić -->
-                        <a href="index.php?page=login&redirect=checkout" class="btn btn-primary btn-lg">Zaloguj się</a>
-                        <a href="index.php?page=register&redirect=checkout" class="btn btn-outline-secondary">Nie mam konta - Zarejestruj się</a>
+                        <!-- redirect=checkout_form, aby AuthController wiedział, gdzie wrócić -->
+                        <a href="index.php?page=login&redirect=checkout_form" class="btn btn-primary btn-lg">Zaloguj się</a>
+                        <a href="index.php?page=register&redirect=checkout_form" class="btn btn-outline-secondary">Nie mam konta - Zarejestruj się</a>
                     </div>
                 </div>
             </div>
