@@ -1,4 +1,4 @@
-<!-- views/checkout_shipping.php -->
+<!-- views/checkout_form.php -->
 <div class="container my-5 text-center">
     <h2>Formularz Dostawy</h2>
     <p>Sukces! Jesteś w kroku dostawy - TODO.</p>

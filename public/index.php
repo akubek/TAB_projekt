@@ -3,7 +3,8 @@
 require_once __DIR__ . '/../bootstrap/init.php';
 
 // --- GUARD: Szybkie odrzucenie brakujących plików statycznych ---
-if (preg_match('/\.(?:png|jpg|jpeg|gif|css|js|ico|woff2?)$/i', $_SERVER['REQUEST_URI'])) {
+$requestPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+if (preg_match('/\.(?:png|jpg|jpeg|gif|css|js|ico|woff2?)$/i', $requestPath)) {
     http_response_code(404);
     exit;
 }
