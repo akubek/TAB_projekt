@@ -91,7 +91,7 @@ class ProductManager
         $sql = "
             SELECT 
                 pv.id as variant_id, pv.product_id, pv.sku, pv.attributes, pv.images, 
-                pv.price_modifier, pv.stock_quantity,
+                pv.variant_price, pv.stock_quantity,
                 p.name as product_name, p.base_price
             FROM product_variants pv
             JOIN products p ON pv.product_id = p.id

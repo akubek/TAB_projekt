@@ -1,6 +1,12 @@
 <div class="py-4">
     <h1 class="mb-4">Twój Koszyk</h1>
 
+    <?php if (!empty($errorMessage)): ?>
+        <div class="alert alert-danger shadow-sm" role="alert">
+            <?= e($errorMessage) ?>
+        </div>
+    <?php endif; ?>
+
     <?php if (empty($items)): ?>
         <div class="alert alert-info py-5 text-center">
             <p class="lead">Twój koszyk jest pusty.</p>

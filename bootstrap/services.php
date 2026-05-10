@@ -29,6 +29,24 @@ return [
         return $instance;
     },
 
+    'cartManager' => function ($c) {
+        static $instance;
+        if ($instance === null) {
+            require_once BASE_PATH . '/src/managers/CartManager.php';
+            $instance = new CartManager($c['productManager']($c));
+        }
+        return $instance;
+    },
+
+    'orderManager' => function ($c) {
+        static $instance;
+        if ($instance === null) {
+            require_once BASE_PATH . '/src/managers/OrderManager.php';
+            $instance = new OrderManager($c['pdo']($c));
+        }
+        return $instance;
+    },
+
     'productManager' => function ($c) {
         static $instance;
         if ($instance === null) {
@@ -47,6 +65,15 @@ return [
         return $instance;
     },
 
+    'userManager' => function ($c) {
+        static $instance;
+        if ($instance === null) {
+            require_once BASE_PATH . '/src/managers/UserManager.php';
+            $instance = new UserManager($c['pdo']($c));
+        }
+        return $instance;
+    },
+
     //Controllers
     'authController' => function ($c) {
         static $instance;
@@ -61,7 +88,7 @@ return [
         static $instance;
         if ($instance === null) {
             require_once BASE_PATH . '/src/controllers/CartController.php';
-            $instance = new CartController($c['productManager']($c));
+            $instance = new CartController($c['cartManager']($c));
         }
         return $instance;
     },
@@ -70,7 +97,7 @@ return [
         static $instance;
         if ($instance === null) {
             require_once BASE_PATH . '/src/controllers/CheckoutController.php';
-            $instance = new CheckoutController();
+            $instance = new CheckoutController($c['orderManager']($c), $c['cartManager']($c), $c['userManager']($c));
         }
         return $instance;
     },
