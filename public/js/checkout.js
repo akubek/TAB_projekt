@@ -60,8 +60,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             }
 
-            // Dodaj klasę Bootstrapa, która włącza pokazywanie stylów .invalid-feedback
-            form.classList.add('was-validated');
+            // dodaj klasę bootstrapa, która włącza pokazywanie stylów .invalid-feedback
+            form.classlist.add('was-validated');
         }, false);
     }
 });

@@ -77,7 +77,7 @@ CREATE TABLE product_variants (
     sku VARCHAR(100) UNIQUE NOT NULL,
     attributes JSONB NOT NULL DEFAULT '{}'::jsonb,
     images JSONB NOT NULL DEFAULT '[]'::jsonb,
-    price_modifier DECIMAL(10,2) DEFAULT 0.00,
+    variant_price DECIMAL(10,2) NOT NULL CHECK (variant_price >= 0),
     stock_quantity INT NOT NULL DEFAULT 0 CHECK (stock_quantity >= 0)
 );
 
@@ -95,6 +95,7 @@ CREATE TABLE orders (
     id SERIAL PRIMARY KEY,
     user_id INT NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
     status VARCHAR(50) NOT NULL DEFAULT 'NEW',
+        CHECK (status IN ('NEW', 'PROCESSING', 'PAID', 'SHIPPED', 'COMPLETED', 'CANCELLED')),
     total_price DECIMAL(10,2) NOT NULL,
     applied_promotion_id INT REFERENCES promotions(id) ON DELETE SET NULL,
     shipping_address JSONB NOT NULL,
@@ -114,6 +115,7 @@ CREATE TABLE order_items (
     id SERIAL PRIMARY KEY,
     order_id INT NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
     variant_id INT NOT NULL REFERENCES product_variants(id) ON DELETE RESTRICT,
+    variant_name VARCHAR(255) NOT NULL,
     quantity INT NOT NULL CHECK (quantity > 0),
     unit_price DECIMAL(10,2) NOT NULL CHECK (unit_price >= 0)
 );

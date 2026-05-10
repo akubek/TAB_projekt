@@ -3,13 +3,13 @@
 
 class CheckoutController
 {
-    private $pdo;
+    private $orderManager;
     private $cartManager;
     private $userManager;
 
-    public function __construct($pdo, $cartManager, $userManager)
+    public function __construct($orderManager, $cartManager, $userManager)
     {
-        $this->pdo = $pdo;
+        $this->orderManager = $orderManager;
         $this->cartManager = $cartManager;
         $this->userManager = $userManager;
     }
@@ -104,20 +104,58 @@ class CheckoutController
 
             // TODO LOGIKA TRANSAKCJI PDO (ZAPIS DO BAZY)
             try {
+                // created guest or user found in db by email
+                $finalUserId = null;
 
-                // Do celów testowych zapisujemy całe dane - todo jeżeli będzie zapis do bazy, zmienić na zapisanie id ostatniego zlozonego zamowienia.
-                $_SESSION['last_order_summary'] = [
-                    'delivery' => $deliveryMethod,
-                    'payment'  => $paymentMethod,
-                    'shipping' => $shippingData,
-                    'total'    => $currentDbTotal,
-                    'items'    => $summary['items'] // Mamy to pod ręką z CartManagera!
-                ];
+                if (isset($_SESSION['user_id'])) {
+                    // Scenariusz A: Zalogowany
+                    $finalUserId = $_SESSION['user_id'];
+                } else {
+                    // Scenariusz B: Gość
+                    $existingUser = $this->userManager->getUserByEmail($finalEmail);
+
+                    if ($existingUser) {
+                        $finalUserId = $existingUser['id'];
+                    } else {
+                        // create guest account (shadow account) if email was not found in database
+                        $finalUserId = $this->userManager->createGuestUser(
+                            $finalEmail,
+                            $shippingData['first_name'],
+                            $shippingData['last_name'],
+                            $shippingData['phone']
+                        );
+                    }
+                }
+
+                //create order 
+                $orderId = $this->orderManager->createOrder(
+                    $finalUserId,
+                    $currentDbTotal,
+                    $deliveryMethod,
+                    $paymentMethod,
+                    $shippingData,
+                    $summary['items']
+                );
+
+                // success - save last order to display to user
+                $_SESSION['last_order_id'] = $orderId;
                 unset($_SESSION['processing_order_time']);
                 unset($_SESSION['checkout_expected_total']);
                 setcookie('cart', '', time() - 3600, '/');
 
                 header("Location: index.php?page=checkout_success");
+                exit;
+            } catch (PriceChangedException $e) {
+                error_log("Błąd kasy: " . $e->getMessage());
+                unset($_SESSION['processing_order_time']);
+                $_SESSION['flash_error'] = $e->getMessage() . " Przepraszamy, prosimy o ponowną weryfikację koszyka.";
+                header("Location: index.php?page=cart");
+                exit;
+            } catch (ProductUnavailableException $e) {
+                error_log("Błąd kasy: " . $e->getMessage());
+                unset($_SESSION['processing_order_time']);
+                $_SESSION['flash_error'] = $e->getMessage() . " Prosimy o usunięcie niedostępnych produktów z koszyka przed kontynuacją.";
+                header("Location: index.php?page=cart");
                 exit;
             } catch (Exception $e) {
                 // W razie błędu PDO TODO - ROLLBACK!!!
@@ -154,18 +192,28 @@ class CheckoutController
 
     public function showSuccess()
     {
-        // Pobieramy dane z sesji
-        $orderData = $_SESSION['last_order_summary'] ?? null;
+        // Pobieramy ID zamówienia z sesji (ustawione po udanym zapisie)
+        $orderId = $_SESSION['last_order_id'] ?? null;
 
-        // Jeśli ktoś wpisze adres z palca, a nie ma danych w sesji -> na stronę główną
-        if (!$orderData) {
+        // Jeśli ktoś wpisze adres z palca, a nie ma przypisanego zamówienia -> na stronę główną
+        if (!$orderId) {
             header("Location: index.php");
             exit;
         }
 
-        // CZYŚCIMY SESJĘ! Dzięki temu strona sukcesu wyświetli się tylko raz. 
-        // Przy odświeżeniu (F5) użytkownik wróci na stronę główną (dzięki if wyżej).
-        unset($_SESSION['last_order_summary']);
+        // Pobieramy świeże dane z bazy za pomocą OrderManagera
+        $orderData = $this->orderManager->getOrderSummary($orderId);
+
+        // Jeśli zamówienie z jakiegoś powodu zniknęło z bazy
+        if (!$orderData) {
+            unset($_SESSION['last_order_id']); // Sprzątamy osierocone ID
+            header("Location: index.php");
+            exit;
+        }
+
+        // UWAGA: Świadomie NIE robimy tutaj unset($_SESSION['last_order_id']); 
+        // Pozwala to użytkownikowi na odświeżenie strony (F5) i spokojne skopiowanie numeru zamówienia.
+        // Zmienna zniknie automatycznie po zamknięciu przeglądarki lub wylogowaniu.
 
         renderView('checkout_success', [
             'order' => $orderData

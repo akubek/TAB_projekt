@@ -28,7 +28,7 @@ class CartManager
                 if (!isset($cart[$v['variant_id']])) continue;
 
                 $qty = $cart[$v['variant_id']];
-                $unitPrice = $v['base_price'] + $v['price_modifier'];
+                $unitPrice = $v['variant_price'];
                 $subtotal = $unitPrice * $qty;
                 $rawAttributes = json_decode($v['attributes'], true);
                 $formattedAttributes = [];
