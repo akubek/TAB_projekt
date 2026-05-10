@@ -49,7 +49,7 @@
 
                         <!-- Odbiór osobisty -->
                         <div id="form-pickup" class="delivery-partial" style="display: none;">
-                            <p>Wybrałeś odbiór osobisty. Nie musisz podawać adresu.</p>
+                            <?php include BASE_PATH . '/views/partials/checkout/address_pickup.php'; ?>
                         </div>
                     </div>
                 </div>

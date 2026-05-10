@@ -5,11 +5,13 @@ class CheckoutController
 {
     private $pdo;
     private $cartManager;
+    private $userManager;
 
-    public function __construct($pdo, $cartManager)
+    public function __construct($pdo, $cartManager, $userManager)
     {
         $this->pdo = $pdo;
         $this->cartManager = $cartManager;
+        $this->userManager = $userManager;
     }
     public function start()
 
@@ -101,10 +103,16 @@ class CheckoutController
 
         $errorMessage = $errorMessage ?? '';
 
+        $currentUser = null;
+        if (isset($_SESSION['user_id'])) {
+            $currentUser = $this->userManager->getUserById($_SESSION['user_id']);
+        }
+
         renderView('checkout_form', [
             'errorMessage' => $errorMessage,
             'items' => $summary['items'],
-            'totalToPay' => $currentDbTotal
+            'totalToPay' => $currentDbTotal,
+            'currentUser' => $currentUser
         ]);
     }
 

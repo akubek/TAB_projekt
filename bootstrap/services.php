@@ -56,6 +56,15 @@ return [
         return $instance;
     },
 
+    'userManager' => function ($c) {
+        static $instance;
+        if ($instance === null) {
+            require_once BASE_PATH . '/src/managers/UserManager.php';
+            $instance = new UserManager($c['pdo']($c));
+        }
+        return $instance;
+    },
+
     //Controllers
     'authController' => function ($c) {
         static $instance;
@@ -79,7 +88,7 @@ return [
         static $instance;
         if ($instance === null) {
             require_once BASE_PATH . '/src/controllers/CheckoutController.php';
-            $instance = new CheckoutController($c['pdo']($c), $c['cartManager']($c));
+            $instance = new CheckoutController($c['pdo']($c), $c['cartManager']($c), $c['userManager']($c));
         }
         return $instance;
     },

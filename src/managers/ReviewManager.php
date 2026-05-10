@@ -1,13 +1,16 @@
 <?php
-class ReviewManager {
+class ReviewManager
+{
     private $pdo;
 
-    public function __construct($pdo) {
+    public function __construct($pdo)
+    {
         $this->pdo = $pdo;
     }
 
     // 1. Pobiera opinie dla danego produktu wraz z imieniem autora
-    public function getReviewsByProductId($productId) {
+    public function getReviewsByProductId($productId)
+    {
         $sql = "
             SELECT r.*, u.first_name 
             FROM reviews r 
@@ -21,7 +24,8 @@ class ReviewManager {
     }
 
     // 2. Wylicza średnią ocen i zlicza wszystkie opinie
-    public function getAverageRating($productId) {
+    public function getAverageRating($productId)
+    {
         $sql = "
             SELECT ROUND(AVG(rating), 1) as avg_rating, COUNT(id) as review_count 
             FROM reviews 
@@ -33,7 +37,8 @@ class ReviewManager {
     }
 
     // Sprawdza, czy użytkownik kupił ten produkt
-    private function checkIfVerifiedPurchase($userId, $productId) {
+    private function checkIfVerifiedPurchase($userId, $productId)
+    {
         $sql = "
             SELECT 1 
             FROM orders o
@@ -49,7 +54,8 @@ class ReviewManager {
     }
 
     // Zapisuje opinię z automatyczną weryfikacją ---
-    public function addReview($productId, $userId, $rating, $comment) {
+    public function addReview($productId, $userId, $rating, $comment)
+    {
         // Automatycznie sprawdzamy weryfikację przed zapisem!
         $isVerified = $this->checkIfVerifiedPurchase($userId, $productId);
 
@@ -66,7 +72,8 @@ class ReviewManager {
             'is_verified' => $isVerified ? 'true' : 'false'
         ]);
     }
-    public function deleteReview($reviewId, $userId) {
+    public function deleteReview($reviewId, $userId)
+    {
         // Warunek user_id = :user_id gwarantuje, że usuniemy tylko SWOJĄ opinię
         $sql = "DELETE FROM reviews WHERE id = :review_id AND user_id = :user_id";
         $stmt = $this->pdo->prepare($sql);
@@ -75,7 +82,8 @@ class ReviewManager {
             'user_id' => $userId
         ]);
     }
-    public function hasUserReviewedProduct($userId, $productId) {
+    public function hasUserReviewedProduct($userId, $productId)
+    {
         $sql = "SELECT 1 FROM reviews WHERE user_id = :user_id AND product_id = :product_id LIMIT 1";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute(['user_id' => $userId, 'product_id' => $productId]);
