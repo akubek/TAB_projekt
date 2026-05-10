@@ -36,12 +36,14 @@ class CategoryController
             // if this category has subcategories display them
             // otherwise display products list
             if (!empty($subcategories)) {
-                $products = $this->productManager->getProductsByCategory($categoryId, 9, 'newest');
+                $sort = $_GET['sort'] ?? 'newest';
+                $products = $this->productManager->getProductsByCategory($categoryId, 9, $sort);
                 renderView('category_list', [
                     'currentCategory' => $currentCategory,
                     'breadcrumbs'     => $breadcrumbs,
                     'subcategories'   => $subcategories,
-                    'products'        => $products
+                    'products'        => $products,
+                    'sort'            => $sort
                 ]);
             } else {
                 $sort = $_GET['sort'] ?? 'newest';

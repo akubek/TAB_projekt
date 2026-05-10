@@ -27,7 +27,7 @@ services:
     ports:
       - "${DB_PORT:-5432}:5432"
     volumes:
-      - db-data:/var/lib/postgresql/data
+      - db-data:/var/lib/postgresql
       # automatic database setup from .sql files
       - ./database:/docker-entrypoint-initdb.d
 
