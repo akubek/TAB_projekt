@@ -42,4 +42,14 @@ function updateCartBadge() {
 document.addEventListener('DOMContentLoaded', () => {
     // after reloading page update the cart badge 
     updateCartBadge();
+
+    // Sortowanie produktów w kategoriach
+    const sortSelect = document.getElementById('sort-select');
+    if (sortSelect) {
+        sortSelect.addEventListener('change', function() {
+            const url = new URL(window.location.href);
+            url.searchParams.set('sort', this.value);
+            window.location.href = url.toString();
+        });
+    }
 });

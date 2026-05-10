@@ -127,6 +127,9 @@ class AuthController
 
     public function logout()
     {
+        // Expire the cart cookie to prevent it from persisting on shared computers
+        setcookie('cart', '', time() - 3600, '/');
+
         // Czyścimy wszystkie dane sesji
         session_unset();
         session_destroy();
