@@ -29,6 +29,15 @@ return [
         return $instance;
     },
 
+    'cartManager' => function ($c) {
+        static $instance;
+        if ($instance === null) {
+            require_once BASE_PATH . '/src/managers/CartManager.php';
+            $instance = new CartManager($c['productManager']($c));
+        }
+        return $instance;
+    },
+
     'productManager' => function ($c) {
         static $instance;
         if ($instance === null) {
@@ -61,7 +70,7 @@ return [
         static $instance;
         if ($instance === null) {
             require_once BASE_PATH . '/src/controllers/CartController.php';
-            $instance = new CartController($c['productManager']($c));
+            $instance = new CartController($c['cartManager']($c));
         }
         return $instance;
     },
@@ -70,7 +79,7 @@ return [
         static $instance;
         if ($instance === null) {
             require_once BASE_PATH . '/src/controllers/CheckoutController.php';
-            $instance = new CheckoutController();
+            $instance = new CheckoutController($c['pdo']($c), $c['cartManager']($c));
         }
         return $instance;
     },

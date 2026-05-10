@@ -23,7 +23,8 @@ return [
 
     // Checkout
     'checkout_start'    => fn($c) => $c['checkoutController']($c)->start(),
-    'checkout_form'     => fn($c) => $c['checkoutController']($c)->showForm(),
+    'checkout_form'     => fn($c) => $c['checkoutController']($c)->handleCheckout(),
+    'checkout_success'  => fn($c) => $c['checkoutController']($c)->showSuccess(),
 
     // Obsługa błędów (przez ErrorController)
     '403' => fn($c) => $c['errorController']($c)->forbidden(),
