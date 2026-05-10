@@ -37,35 +37,55 @@ class AuthController
             } elseif (empty($firstName) || empty($lastName)) {
                 $error_message = "Imię i nazwisko są wymagane.";
             } else {
-                $stmt = $this->pdo->prepare("SELECT id FROM users WHERE email = :email");
-                $stmt->execute(['email' => $email]);
+                try {
+                    $stmt = $this->pdo->prepare("SELECT id, role FROM users WHERE email = :email");
+                    $stmt->execute(['email' => $email]);
+                    $existingUser = $stmt->fetch(PDO::FETCH_ASSOC);
 
-                if ($stmt->fetch()) {
-                    $error_message = "Konto z tym adresem e-mail już istnieje!";
-                } else {
-                    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-                    $insertStmt = $this->pdo->prepare("
-                        INSERT INTO users (first_name, last_name, email, password_hash) 
-                        VALUES (:first_name, :last_name, :email, :password_hash)
-                    ");
-                    try {
-                        $insertStmt->execute([
-                            'first_name' => $firstName,
-                            'last_name' => $lastName,
-                            'email' => $email,
-                            'password_hash' => $hashedPassword
-                        ]);
-
+                    if ($existingUser && $existingUser['role'] !== 'GUEST') {
+                        error_log("existing user id " . $existingUser['id'] . " role " . $existingUser['role']);
+                        $error_message = "Konto z tym adresem e-mail już istnieje!";
+                    } else {
+                        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+                        if ($existingUser && $existingUser['role'] === 'GUEST') {
+                            // SCENARIUSZ 1: Użytkownik kupował jako gość -> Zmieniamy go w pełne konto
+                            $saveStmt = $this->pdo->prepare("
+                                UPDATE users 
+                                SET first_name = :first_name, 
+                                    last_name = :last_name, 
+                                    password_hash = :password_hash, 
+                                    role = 'CLIENT' 
+                                WHERE id = :id
+                            ");
+                            $saveStmt->execute([
+                                'first_name'    => $firstName,
+                                'last_name'     => $lastName,
+                                'password_hash' => $hashedPassword,
+                                'id'            => $existingUser['id']
+                            ]);
+                        } else {
+                            // SCENARIUSZ 2: Użytkownik jest całkowicie nowy -> Tworzymy konto
+                            $saveStmt = $this->pdo->prepare("
+                                INSERT INTO users (first_name, last_name, email, password_hash, role) 
+                                VALUES (:first_name, :last_name, :email, :password_hash, 'CLIENT')
+                            ");
+                            $saveStmt->execute([
+                                'first_name'    => $firstName,
+                                'last_name'     => $lastName,
+                                'email'         => $email,
+                                'password_hash' => $hashedPassword
+                            ]);
+                        }
                         $_SESSION['flash_success'] = "Konto zostało pomyślnie utworzone! Możesz się teraz zalogować.";
                         header("Location: index.php?page=login");
                         exit;
-                    } catch (PDOException $e) {
-                        error_log("Registration error for email {$email} : " . $e->getMessage());
-                        if (in_array((string) $e->getCode(), ['23000', '23505'], true)) {
-                            $error_message = "Konto z tym adresem e-mail już istnieje";
-                        } else {
-                            $error_message = "Błąd podczas rejestracji";
-                        }
+                    }
+                } catch (PDOException $e) {
+                    error_log("Registration error for email {$email} : " . $e->getMessage());
+                    if (in_array((string) $e->getCode(), ['23000', '23505'], true)) {
+                        $error_message = "Konto z tym adresem e-mail już istnieje";
+                    } else {
+                        $error_message = "Błąd podczas rejestracji";
                     }
                 }
             }
