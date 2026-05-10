@@ -1,5 +1,6 @@
 // public/js/checkout.js
 document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('checkout-form');
     const deliveryRadios = document.querySelectorAll('input[name="delivery_method"]');
     const partials = document.querySelectorAll('.delivery-partial');
 
@@ -14,8 +15,12 @@ document.addEventListener('DOMContentLoaded', function () {
             if (partial.id === 'form-' + selectedMethod) {
                 // Pokaż partial
                 partial.style.display = 'block';
-                // Odblokuj inputy (teraz przeglądarka będzie sprawdzać ich 'required')
-                inputs.forEach(input => input.disabled = false);
+                // Odblokowujemy pola w aktywnej zakładce (o ile nie mają twardej blokady data-locked)
+                inputs.forEach(input => {
+                    if (!input.hasAttribute('data-locked')) {
+                        input.disabled = false;
+                    }
+                });
             } else {
                 // Ukryj partial
                 partial.style.display = 'none';
@@ -33,6 +38,30 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Uruchom raz na starcie, żeby upewnić się, że stan jest poprawny
-    const initialMethod = document.querySelector('input[name="delivery_method"]:checked').value;
-    updateDeliveryForm(initialMethod);
+    const initialMethod = document.querySelector('input[name="delivery_method"]:checked');
+    if (initialMethod) {
+        updateDeliveryForm(initialMethod.value);
+    }
+
+    // ==========================================
+    // WALIDACJA BOOTSTRAP (Czerwone ramki)
+    // ==========================================
+    if (form) {
+        form.addEventListener('submit', function (event) {
+            // Jeśli formularz ma błędy (np. zły format kodu pocztowego lub pusty email)
+            if (!form.checkValidity()) {
+                event.preventDefault(); // Zatrzymaj wysyłanie
+                event.stopPropagation(); // Zatrzymaj inne skrypty
+
+                // Płynnie przewiń ekran do pierwszego błędu
+                const firstInvalid = form.querySelector(':invalid');
+                if (firstInvalid) {
+                    firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+
+            // Dodaj klasę Bootstrapa, która włącza pokazywanie stylów .invalid-feedback
+            form.classList.add('was-validated');
+        }, false);
+    }
 });

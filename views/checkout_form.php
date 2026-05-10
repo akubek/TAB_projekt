@@ -14,11 +14,18 @@
     -->
     <div class="row">
         <div class="col-lg-8 mb-4">
-            <form id="checkout-form" method="POST" action="index.php?page=checkout_form">
+            <form id="checkout-form" method="POST" action="index.php?page=checkout_form" novalidate>
 
-                <!-- SEKCJA 1: DOSTAWA -->
                 <div class="card shadow-sm border-0 p-4 mb-4">
-                    <h4 class="mb-3">1. Wybierz metodę dostawy</h4>
+                    <h4 class="mb-3">1. Dane kontaktowe</h4>
+                    <div class="row g-3">
+                        <?php include BASE_PATH . '/views/partials/checkout/contact_info.php'; ?>
+                    </div>
+                </div>
+
+                <!-- SEKCJA 2: DOSTAWA -->
+                <div class="card shadow-sm border-0 p-4 mb-4">
+                    <h4 class="mb-3">2. Wybierz metodę dostawy</h4>
 
                     <div class="mb-3">
                         <label>
@@ -56,7 +63,7 @@
 
                 <!-- SEKCJA 2: PŁATNOŚĆ (Bez partiali, bo to tylko opcje) -->
                 <div class="card shadow-sm border-0 p-4 mb-4">
-                    <h4 class="mb-3">2. Wybierz metodę płatności</h4>
+                    <h4 class="mb-3">3. Wybierz metodę płatności</h4>
 
                     <label>
                         <input type="radio" name="payment_method" value="payu" checked>
