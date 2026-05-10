@@ -2,6 +2,12 @@
 <div class="checkout-container py-4">
     <h1>Kasa - Finalizacja zamówienia</h1>
 
+    <?php if (!empty($errorMessage)): ?>
+        <div class="alert alert-danger shadow-sm" role="alert">
+            <?= e($errorMessage) ?>
+        </div>
+    <?php endif; ?>
+
     <p>Tryb:
         <strong>
             <?= isset($_SESSION['user_id']) ? 'Zalogowany Użytkownik' : 'Gość' ?>
@@ -15,6 +21,7 @@
     <div class="row">
         <div class="col-lg-8 mb-4">
             <form id="checkout-form" method="POST" action="index.php?page=checkout_form" novalidate>
+                <input type="hidden" name="checkout_token" value="<?= e($checkoutToken) ?>">
 
                 <div class="card shadow-sm border-0 p-4 mb-4">
                     <h4 class="mb-3">1. Dane kontaktowe</h4>

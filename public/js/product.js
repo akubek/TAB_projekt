@@ -131,7 +131,6 @@ document.addEventListener('DOMContentLoaded', () => {
             // ZAPISUJEMY DO ZMIENNEJ W JS
             currentMatchedVariantId = matchedVariant.id;
 
-            const basePrice = parseFloat(container.dataset.basePrice || 0);
             priceTag.innerText = parseFloat(matchedVariant.variant_price).toFixed(2) + ' zł';
 
             const images = JSON.parse(matchedVariant.images);

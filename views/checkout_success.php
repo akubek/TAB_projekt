@@ -10,10 +10,14 @@ $deliveryLabels = [
 ];
 
 $paymentLabels = [
-    'cash_on_delivery' => 'Płatność przy odbiorze',
-    'online'           => 'Płatność online',
-    'blik'             => 'BLIK',
-    'transfer'         => 'Przelew tradycyjny'
+    'cash_on_delivery'  => 'Płatność przy odbiorze',
+    'payu'              => 'Płatność online (PayU)',
+    'bank_transfer'     => 'Przelew tradycyjny',
+
+
+    'online'            => 'Płatność online',
+    'blik'              => 'BLIK',
+    'transfer'          => 'Przelew tradycyjny'
 ];
 
 // Pobieramy przetłumaczone wartości (z tzw. fallbackiem - jeśli dodasz w przyszłości 
@@ -76,17 +80,14 @@ $paymentName  = $paymentLabels[$order['payment_method']] ?? strtoupper($order['p
             <div class="card shadow-sm border-0">
                 <div class="card-body p-4">
                     <h5 class="card-title border-bottom pb-2 mb-3">Kupione produkty</h5>
-                    <ul class="list-group list-group-flush">
-                        <?php foreach ($order['items'] as $item): ?>
-                            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                                <div>
-                                    <span class="fw-medium"><?= e($item['product_name']) ?></span>
-                                    <small class="text-muted d-block">Ilość: <?= e($item['quantity']) ?> szt.</small>
-                                </div>
-                                <span><?= number_format($item['unit_price'] * $item['quantity'], 2) ?> zł</span>
-                            </li>
-                        <?php endforeach; ?>
-                    </ul>
+
+                    <?php
+                    // Przekazujemy items z zamówienia i ustawiamy flagę
+                    $items = $order['items'];
+                    $isSuccessPage = true;
+                    include BASE_PATH . '/views/partials/checkout/order_items_list.php';
+                    ?>
+
                     <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
                         <span class="fs-5 fw-bold">Razem do zapłaty:</span>
                         <span class="fs-4 fw-bold text-primary"><?= number_format($order['total_price'], 2) ?> zł</span>

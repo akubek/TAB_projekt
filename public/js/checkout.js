@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             // dodaj klasę bootstrapa, która włącza pokazywanie stylów .invalid-feedback
-            form.classlist.add('was-validated');
+            form.classList.add('was-validated');
         }, false);
     }
 });

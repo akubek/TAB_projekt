@@ -16,7 +16,7 @@ class CheckoutController
     public function start()
 
     {
-        $this->requireValidCart();
+        $this->requireValidCart(); //we ignore the returned value
 
         if (isset($_SESSION['user_id'])) {
             header('Location: index.php?page=checkout_form');
@@ -28,34 +28,50 @@ class CheckoutController
 
     public function handleCheckout()
     {
-        $this->requireValidCart();
-
-        $cart = isset($_COOKIE['cart']) ? json_decode($_COOKIE['cart'], true) : [];
+        $cart = $this->requireValidCart();
         $summary = $this->cartManager->getCartSummary($cart);
         $currentDbTotal = $summary['totalPrice'];
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-            // Timestamp Lock
-            if (isset($_SESSION['processing_order_time'])) {
-                if (time() - $_SESSION['processing_order_time'] < 15) {
-                    $this->redirectWithError("Przetwarzamy Twoje zamówienie. Proszę chwilę poczekać...");
-                }
+            // Idempotency Token
+            $postedToken = $_POST['checkout_token'] ?? '';
+            $sessionToken = $_SESSION['checkout_token'] ?? '';
+
+            if (empty($postedToken) || $postedToken !== $sessionToken) {
+                // Drugie żądanie wpadnie tutaj, bo token w sesji zostanie usunięty przez pierwsze żądanie!
+                $this->redirectWithError("Przetwarzamy już to żądanie lub formularz wygasł. Sprawdź koszyk.");
             }
-            $_SESSION['processing_order_time'] = time();
+            // Natychmiastowe "spalenie" tokenu w sesji - drugie żądanie (jeśli czeka) od razu na tym polegnie
+            unset($_SESSION['checkout_token']);
 
             $expectedTotal = $_SESSION['checkout_expected_total'] ?? 0;
-            if ($currentDbTotal !== $expectedTotal) {
+            if (abs($currentDbTotal - $expectedTotal) > 0.01) {
                 $this->redirectWithError("Ceny uległy zmianie! Zaktualizowaliśmy koszyk.", "cart");
             }
 
-            $deliveryMethod = $_POST['delivery_method'] ?? '';
             $paymentMethod = $_POST['payment_method'] ?? '';
+            $allowedPayments = ['cash_on_delivery', 'online', 'blik', 'transfer', 'payu', 'bank_transfer']; // Dopasuj do swoich wartości z formularza!
+            if (!in_array($paymentMethod, $allowedPayments, true)) {
+                $this->redirectWithError("Wybrano nieprawidłową metodę płatności!");
+            }
+
+            $deliveryMethod = $_POST['delivery_method'] ?? '';
+            $allowedDeliveries = ['pickup', 'courier', 'paczkomat']; // Dopasuj do swojego HTML
+            if (!in_array($deliveryMethod, $allowedDeliveries, true)) {
+                $this->redirectWithError("Wybrano nieprawidłową metodę dostawy!");
+            }
+
             $shippingData = $_POST['shipping'] ?? [];
 
-            // basic sanitization
+            // Zabezpieczenie przed podaniem stringa zamiast tablicy w shipping
+            if (!is_array($shippingData)) {
+                $shippingData = [];
+            }
+
+            // Basic sanitization
             foreach ($shippingData as $key => $value) {
-                $shippingData[$key] = trim(strip_tags($value));
+                $shippingData[$key] = trim(strip_tags((string)$value));
             }
 
             // check email validity
@@ -86,6 +102,10 @@ class CheckoutController
                 $this->redirectWithError("Imię i nazwisko są wymagane!");
             }
 
+            if (empty($shippingData['first_name']) || empty($shippingData['last_name'])) {
+                $this->redirectWithError("Imię i nazwisko są wymagane!");
+            }
+
             if ($deliveryMethod === 'courier') {
                 if (empty($shippingData['street']) || empty($shippingData['city'])) {
                     $this->redirectWithError("Proszę podać pełny adres (ulica i miasto).");
@@ -97,9 +117,6 @@ class CheckoutController
                 if (empty($shippingData['paczkomat_code'])) {
                     $this->redirectWithError("Proszę podać kod Paczkomatu.");
                 }
-            } elseif ($deliveryMethod !== 'pickup') {
-                // Jeśli ktoś próbował zhakować radio button i przesłał metodę, której nie znamy:
-                $this->redirectWithError("Nieznana metoda dostawy.");
             }
 
             // TODO LOGIKA TRANSAKCJI PDO (ZAPIS DO BAZY)
@@ -130,7 +147,7 @@ class CheckoutController
                 //create order 
                 $orderId = $this->orderManager->createOrder(
                     $finalUserId,
-                    $currentDbTotal,
+                    $expectedTotal,
                     $deliveryMethod,
                     $paymentMethod,
                     $shippingData,
@@ -139,7 +156,6 @@ class CheckoutController
 
                 // success - save last order to display to user
                 $_SESSION['last_order_id'] = $orderId;
-                unset($_SESSION['processing_order_time']);
                 unset($_SESSION['checkout_expected_total']);
                 setcookie('cart', '', time() - 3600, '/');
 
@@ -147,33 +163,27 @@ class CheckoutController
                 exit;
             } catch (PriceChangedException $e) {
                 error_log("Błąd kasy: " . $e->getMessage());
-                unset($_SESSION['processing_order_time']);
-                $_SESSION['flash_error'] = $e->getMessage() . " Przepraszamy, prosimy o ponowną weryfikację koszyka.";
-                header("Location: index.php?page=cart");
+                $this->redirectWithError($e->getMessage() . " Przepraszamy, prosimy o ponowną weryfikację koszyka.", 'cart');
                 exit;
             } catch (ProductUnavailableException $e) {
                 error_log("Błąd kasy: " . $e->getMessage());
-                unset($_SESSION['processing_order_time']);
-                $_SESSION['flash_error'] = $e->getMessage() . " Prosimy o usunięcie niedostępnych produktów z koszyka przed kontynuacją.";
-                header("Location: index.php?page=cart");
+                $this->redirectWithError($e->getMessage() . " Prosimy o usunięcie niedostępnych produktów z koszyka przed kontynuacją.", 'cart');
                 exit;
             } catch (Exception $e) {
-                // W razie błędu PDO TODO - ROLLBACK!!!
                 error_log("Błąd kasy: " . $e->getMessage());
-                $errorMessage = "Wystąpił problem z systemem. Spróbuj ponownie.";
+                $this->redirectWithError("Wystąpił krytyczny problem z systemem. Spróbuj ponownie.");
             } finally {
-                // c) Niezależnie co się stało, zdejmujemy blokadę podwójnego kliknięcia!
-                unset($_SESSION['processing_order_time']);
+                //if needed add cleaning here
             }
         }
 
         // ==========================================
         // 3. OBSŁUGA ŻĄDANIA GET (Zwykłe wejście na stronę - renderowanie formularza)
         // ==========================================
-        unset($_SESSION['processing_order_time']);
-
         $_SESSION['checkout_expected_total'] = $currentDbTotal;
 
+        $checkoutToken = bin2hex(random_bytes(32));
+        $_SESSION['checkout_token'] = $checkoutToken;
         $errorMessage = $_SESSION['flash_error'] ?? '';
         unset($_SESSION['flash_error']);
 
@@ -186,7 +196,8 @@ class CheckoutController
             'errorMessage' => $errorMessage,
             'items' => $summary['items'],
             'totalToPay' => $currentDbTotal,
-            'currentUser' => $currentUser
+            'currentUser' => $currentUser,
+            'checkoutToken' => $checkoutToken
         ]);
     }
 
@@ -232,12 +243,31 @@ class CheckoutController
         exit;
     }
 
-    private function requireValidCart(): void
+    private function requireValidCart(): array
     {
-        $cart = isset($_COOKIE['cart']) ? json_decode($_COOKIE['cart'], true) : [];
-        if (empty($cart)) {
-            header('Location: index.php?page=cart');
-            exit;
+        // Pobieramy i dekodujemy surowe ciasteczko
+        $rawCart = isset($_COOKIE['cart']) ? json_decode($_COOKIE['cart'], true) : [];
+        if (!is_array($rawCart)) {
+            $rawCart = [];
         }
+
+        $cleanCart = [];
+
+        // Rygorystyczna sanitaryzacja
+        foreach ($rawCart as $variantId => $qty) {
+            $qtyInt = (int)$qty;
+            if ($qtyInt > 0) {
+                $cleanCart[(int)$variantId] = $qtyInt;
+            }
+        }
+
+        if (empty($cleanCart)) {
+            // Opcjonalnie: od razu usuwamy zepsute ciasteczko w przeglądarce klienta
+            setcookie('cart', '', time() - 3600, '/');
+            $this->redirectWithError("Twój koszyk jest pusty lub zawierał nieprawidłowe dane.", "cart");
+        }
+
+        // Zwracamy w 100% bezpieczną tablicę [variant_id => quantity]
+        return $cleanCart;
     }
 }

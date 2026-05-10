@@ -43,7 +43,6 @@ class AuthController
                     $existingUser = $stmt->fetch(PDO::FETCH_ASSOC);
 
                     if ($existingUser && $existingUser['role'] !== 'GUEST') {
-                        error_log("existing user id " . $existingUser['id'] . " role " . $existingUser['role']);
                         $error_message = "Konto z tym adresem e-mail już istnieje!";
                     } else {
                         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
