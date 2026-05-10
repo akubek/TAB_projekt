@@ -14,8 +14,9 @@ return [
     'login'             => fn($c) => $c['authController']($c)->showLogin(),
     'logout'            => fn($c) => $c['authController']($c)->logout(),
     'register'          => fn($c) => $c['authController']($c)->showRegister(),
-    'profile'           => fn($c) => $c['authController']($c)->showProfile(),
-    'change-password'   => fn($c) => $c['authController']($c)->changePassword(),
+
+    'profile'           => fn($c) => $c['profileController']($c)->index(),
+    'change_password'   => fn($c) => $c['profileController']($c)->changePassword(),
 
     // Recenzje
     'add_review'        => fn($c) => $c['reviewController']($c)->add(),

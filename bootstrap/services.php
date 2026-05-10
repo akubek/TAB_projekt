@@ -129,6 +129,15 @@ return [
         return $instance;
     },
 
+    'profileController' => function ($c) {
+        static $instance;
+        if ($instance === null) {
+            require_once BASE_PATH . '/src/controllers/ProfileController.php';
+            $instance = new ProfileController($c['userManager']($c));
+        }
+        return $instance;
+    },
+
     'reviewController' => function ($c) {
         static $instance;
         if ($instance === null) {
