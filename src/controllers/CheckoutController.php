@@ -38,35 +38,72 @@ class CheckoutController
 
             // Timestamp Lock
             if (isset($_SESSION['processing_order_time'])) {
-                $lockTime = $_SESSION['processing_order_time'];
-
-                // Jeśli od poprzedniej próby minęło mniej niż 15 sekund:
-                if (time() - $lockTime < 15) {
-                    // To spam lub niecierpliwy użytkownik. 
-                    $_SESSION['flash_error'] = "Przetwarzamy Twoje zamówienie. Proszę chwilę poczekać...";
-                    header("Location: index.php?page=checkout_form");
-                    exit;
+                if (time() - $_SESSION['processing_order_time'] < 15) {
+                    $this->redirectWithError("Przetwarzamy Twoje zamówienie. Proszę chwilę poczekać...");
                 }
             }
             $_SESSION['processing_order_time'] = time();
 
-            try {
+            $expectedTotal = $_SESSION['checkout_expected_total'] ?? 0;
+            if ($currentDbTotal !== $expectedTotal) {
+                $this->redirectWithError("Ceny uległy zmianie! Zaktualizowaliśmy koszyk.", "cart");
+            }
 
-                $expectedTotal = $_SESSION['checkout_expected_total'] ?? 0;
+            $deliveryMethod = $_POST['delivery_method'] ?? '';
+            $paymentMethod = $_POST['payment_method'] ?? '';
+            $shippingData = $_POST['shipping'] ?? [];
 
-                if ($currentDbTotal !== $expectedTotal) {
-                    // Cena w bazie uległa zmianie w trakcie trwania sesji!
-                    unset($_SESSION['processing_order_time']);
-                    $_SESSION['flash_error'] = "Ceny produktów uległy zmianie! Zaktualizowaliśmy Twój koszyk, prosimy o ponowną weryfikację.";
-                    header("Location: index.php?page=cart");
-                    exit;
+            // basic sanitization
+            foreach ($shippingData as $key => $value) {
+                $shippingData[$key] = trim(strip_tags($value));
+            }
+
+            // check email validity
+            $finalEmail = '';
+            if (isset($_SESSION['user_id'])) {
+                // logged in - get from database
+                $currentUser = $this->userManager->getUserById($_SESSION['user_id']);
+                $finalEmail = $currentUser['email'] ?? '';
+                unset($shippingData['email']); // Ignorujemy to, co mogło przyjść z frontu
+            } else {
+                // guest - check e-mail format
+                $guestEmail = $shippingData['email'] ?? '';
+                if (!filter_var($guestEmail, FILTER_VALIDATE_EMAIL)) {
+                    $this->redirectWithError("Podano niepoprawny adres e-mail!");
                 }
-                // b) TUTAJ BĘDZIE LOGIKA TRANSAKCJI PDO (ZAPIS DO BAZY)
-                // Na razie tylko "łapiemy" dane, żebyś zobaczył, co przyszło.
+                $finalEmail = $guestEmail;
+            }
 
-                $deliveryMethod = $_POST['delivery_method'] ?? '';
-                $paymentMethod = $_POST['payment_method'] ?? '';
-                $shippingData = $_POST['shipping'] ?? [];
+            // normlize and validate phone
+            $phone = preg_replace('/[^0-9]/', '', $shippingData['phone'] ?? '');
+
+            if (strlen($phone) !== 9) {
+                $this->redirectWithError("Podano niepoprawny numer telefonu. Wymagane jest 9 cyfr.");
+            }
+            $shippingData['phone'] = $phone; // Zapisujemy z powrotem czysty numer do tablicy
+
+            if (empty($shippingData['first_name']) || empty($shippingData['last_name'])) {
+                $this->redirectWithError("Imię i nazwisko są wymagane!");
+            }
+
+            if ($deliveryMethod === 'courier') {
+                if (empty($shippingData['street']) || empty($shippingData['city'])) {
+                    $this->redirectWithError("Proszę podać pełny adres (ulica i miasto).");
+                }
+                if (!preg_match('/^[0-9]{2}-[0-9]{3}$/', $shippingData['zip_code'] ?? '')) {
+                    $this->redirectWithError("Niepoprawny format kodu pocztowego (wymagany: XX-XXX).");
+                }
+            } elseif ($deliveryMethod === 'paczkomat') {
+                if (empty($shippingData['paczkomat_code'])) {
+                    $this->redirectWithError("Proszę podać kod Paczkomatu.");
+                }
+            } elseif ($deliveryMethod !== 'pickup') {
+                // Jeśli ktoś próbował zhakować radio button i przesłał metodę, której nie znamy:
+                $this->redirectWithError("Nieznana metoda dostawy.");
+            }
+
+            // TODO LOGIKA TRANSAKCJI PDO (ZAPIS DO BAZY)
+            try {
 
                 // Do celów testowych zapisujemy całe dane - todo jeżeli będzie zapis do bazy, zmienić na zapisanie id ostatniego zlozonego zamowienia.
                 $_SESSION['last_order_summary'] = [
@@ -80,12 +117,10 @@ class CheckoutController
                 unset($_SESSION['checkout_expected_total']);
                 setcookie('cart', '', time() - 3600, '/');
 
-                // Po udanym testowym var_dump, zabijamy skrypt, żeby nie renderował widoku pod spodem
-                unset($_SESSION['processing_order_time']);
                 header("Location: index.php?page=checkout_success");
                 exit;
             } catch (Exception $e) {
-                // W razie błędu PDO
+                // W razie błędu PDO TODO - ROLLBACK!!!
                 error_log("Błąd kasy: " . $e->getMessage());
                 $errorMessage = "Wystąpił problem z systemem. Spróbuj ponownie.";
             } finally {
@@ -101,7 +136,8 @@ class CheckoutController
 
         $_SESSION['checkout_expected_total'] = $currentDbTotal;
 
-        $errorMessage = $errorMessage ?? '';
+        $errorMessage = $_SESSION['flash_error'] ?? '';
+        unset($_SESSION['flash_error']);
 
         $currentUser = null;
         if (isset($_SESSION['user_id'])) {
@@ -134,6 +170,18 @@ class CheckoutController
         renderView('checkout_success', [
             'order' => $orderData
         ]);
+    }
+
+    private function redirectWithError(string $message, string $page = 'checkout_form'): void
+    {
+        unset($_SESSION['processing_order_time']);
+
+        // Opcjonalnie: Tutaj w przyszłości możesz zapisywać do sesji $_POST['shipping'], 
+        // żeby zwrócić klientowi wpisane przez niego dane, aby nie musiał wypełniać formularza od nowa!
+
+        $_SESSION['flash_error'] = $message;
+        header("Location: index.php?page=" . $page);
+        exit;
     }
 
     private function requireValidCart(): void
