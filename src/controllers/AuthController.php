@@ -8,11 +8,13 @@ class AuthController
         'home'
     ];
 
-    private $pdo;
+    private $authManager;
+    private $userManager;
 
-    public function __construct($pdo)
+    public function __construct($authManager, $userManager)
     {
-        $this->pdo = $pdo;
+        $this->authManager = $authManager;
+        $this->userManager = $userManager;
     }
 
     public function showRegister()
@@ -38,9 +40,7 @@ class AuthController
                 $error_message = "Imię i nazwisko są wymagane.";
             } else {
                 try {
-                    $stmt = $this->pdo->prepare("SELECT id, role FROM users WHERE email = :email");
-                    $stmt->execute(['email' => $email]);
-                    $existingUser = $stmt->fetch(PDO::FETCH_ASSOC);
+                    $existingUser = $this->userManager->getUserByEmail($email);
 
                     if ($existingUser && $existingUser['role'] !== 'GUEST') {
                         $error_message = "Konto z tym adresem e-mail już istnieje!";
@@ -48,32 +48,20 @@ class AuthController
                         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
                         if ($existingUser && $existingUser['role'] === 'GUEST') {
                             // SCENARIUSZ 1: Użytkownik kupował jako gość -> Zmieniamy go w pełne konto
-                            $saveStmt = $this->pdo->prepare("
-                                UPDATE users 
-                                SET first_name = :first_name, 
-                                    last_name = :last_name, 
-                                    password_hash = :password_hash, 
-                                    role = 'CLIENT' 
-                                WHERE id = :id
-                            ");
-                            $saveStmt->execute([
-                                'first_name'    => $firstName,
-                                'last_name'     => $lastName,
-                                'password_hash' => $hashedPassword,
-                                'id'            => $existingUser['id']
-                            ]);
+                            $this->userManager->upgradeGuestToClient(
+                                $existingUser['id'],
+                                $firstName,
+                                $lastName,
+                                $hashedPassword
+                            );
                         } else {
                             // SCENARIUSZ 2: Użytkownik jest całkowicie nowy -> Tworzymy konto
-                            $saveStmt = $this->pdo->prepare("
-                                INSERT INTO users (first_name, last_name, email, password_hash, role) 
-                                VALUES (:first_name, :last_name, :email, :password_hash, 'CLIENT')
-                            ");
-                            $saveStmt->execute([
-                                'first_name'    => $firstName,
-                                'last_name'     => $lastName,
-                                'email'         => $email,
-                                'password_hash' => $hashedPassword
-                            ]);
+                            $this->userManager->createUser(
+                                $firstName,
+                                $lastName,
+                                $email,
+                                $hashedPassword
+                            );
                         }
                         $_SESSION['flash_success'] = "Konto zostało pomyślnie utworzone! Możesz się teraz zalogować.";
                         header("Location: index.php?page=login");
@@ -112,23 +100,11 @@ class AuthController
 
             // additional email format check
             if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                // find user by email
-                $stmt = $this->pdo->prepare("SELECT * FROM users WHERE email = :email");
-                $stmt->execute(['email' => $email]);
-                $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
                 // user is registered in database and passwords match
-                if ($user && password_verify($password, $user['password_hash'])) {
-
-                    // create session for user
-                    $_SESSION['user_id'] = $user['id'];
-                    $_SESSION['role'] = $user['role'];
-                    $_SESSION['first_name'] = $user['first_name'];
-
+                if ($this->authManager->login($email, $password)) {
                     // redirect back to intended page or main page
                     $targetPage = $_SESSION['intended_redirect'] ?? 'home';
-                    unset($_SESSION['intended_redirect']); // bardzo ważne czyszczenie!
-
+                    unset($_SESSION['intended_redirect']);
                     header("Location: index.php?page=" . $targetPage);
                     exit;
                 } else {

@@ -12,7 +12,7 @@ class AuthManager
     public function login($email, $password)
     {
         $user = $this->userManager->getUserByEmail($email);
-        if ($user && password_verify($password, $user['password_hash'])) {
+        if ($user && $this->verifyCurrentPassword($user['id'], $password)) {
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['role'] = $user['role'];
             $_SESSION['first_name'] = $user['first_name'];
@@ -23,7 +23,7 @@ class AuthManager
 
     public function verifyCurrentPassword($userId, $password)
     {
-        // Pobieramy tylko potrzebny hash z bazy (UserManager odwala czarną robotę SQL-ową)
+        // Pobieramy tylko potrzebny hash z bazy
         $hash = $this->userManager->getPasswordHash($userId);
 
         if ($hash && password_verify($password, $hash)) {

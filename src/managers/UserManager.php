@@ -22,6 +22,13 @@ class UserManager
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
+    public function getPasswordHash($userId)
+    {
+        $stmt = $this->pdo->prepare("SELECT password_hash FROM users WHERE id = ?");
+        $stmt->execute([$userId]);
+        return $stmt->fetchColumn();
+    }
+
     public function createUser($firstName, $lastName, $email, $passwordHash, $role = 'CLIENT')
     {
         $stmt = $this->pdo->prepare("
@@ -43,6 +50,28 @@ class UserManager
         $stmt->execute([$email, $firstName, $lastName, $phone]);
 
         return $this->pdo->lastInsertId();
+    }
+
+    public function upgradeGuestToClient($userId, $firstName, $lastName, $passwordHash)
+    {
+        $user = $this->getUserById($userId);
+        if (!$user || $user['role'] !== 'GUEST') {
+            return false;
+        }
+        $saveStmt = $this->pdo->prepare("
+                                UPDATE users 
+                                SET first_name = :first_name, 
+                                    last_name = :last_name, 
+                                    password_hash = :password_hash, 
+                                    role = 'CLIENT' 
+                                WHERE id = :id
+                            ");
+        return $saveStmt->execute([
+            'first_name'    => $firstName,
+            'last_name'     => $lastName,
+            'password_hash' => $passwordHash,
+            'id'            => $userId
+        ]);
     }
 
     public function updateBasicData($id, $firstName, $lastName, $email)

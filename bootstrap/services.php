@@ -19,6 +19,16 @@ return [
     },
 
     // Managers
+
+    'authManager' => function ($c) {
+        static $instance;
+        if ($instance === null) {
+            require_once BASE_PATH . '/src/managers/AuthManager.php';
+            $instance = new AuthManager($c['userManager']($c));
+        }
+        return $instance;
+    },
+
     'categoryManager' => function ($c) {
         //singleton isnstance is optimal
         static $instance;
@@ -79,7 +89,7 @@ return [
         static $instance;
         if ($instance === null) {
             require_once BASE_PATH . '/src/controllers/AuthController.php';
-            $instance = new AuthController($c['pdo']($c));
+            $instance = new AuthController($c['authManager']($c), $c['userManager']($c));
         }
         return $instance;
     },
