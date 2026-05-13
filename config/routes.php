@@ -16,6 +16,10 @@ return [
     'register'          => fn($c) => $c['authController']($c)->showRegister(),
 
     'profile'           => fn($c) => $c['profileController']($c)->index(),
+    'profile_orders'    => fn($c) => $c['profileController']($c)->orders(),
+    'profile_reviews'   => fn($c) => $c['profileController']($c)->reviews(),
+    'profile_addresses' => fn($c) => $c['profileController']($c)->addresses(),
+    'profile_settings'  => fn($c) => $c['profileController']($c)->settings(),
     'change_password'   => fn($c) => $c['profileController']($c)->changePassword(),
 
     // Recenzje
