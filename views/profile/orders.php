@@ -35,7 +35,7 @@
                             <div class="row align-items-center">
                                 <div class="col-sm-8 mb-2 mb-sm-0">
                                     <p class="mb-0 text-muted">Wartość zamówienia:</p>
-                                    <h5 class="mb-0 fw-bold"><?= number_format($order['total_amount'], 2, ',', ' ') ?> zł</h5>
+                                    <h5 class="mb-0 fw-bold"><?= number_format($order['total_price'], 2, ',', ' ') ?> zł</h5>
                                 </div>
                                 <div class="col-sm-4 text-sm-end">
                                     <a href="index.php?page=order_details&id=<?= $order['id'] ?>" class="btn btn-sm btn-outline-primary">Szczegóły</a>

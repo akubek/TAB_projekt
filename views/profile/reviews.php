@@ -20,15 +20,24 @@
                 </div>
             <?php else: ?>
                 <?php foreach ($reviews as $review): ?>
-                    <div class="card shadow-sm border-0 mb-3">
+                    <div class="card shadow-sm border-0 mb-3 position-relative">
                         <div class="card-body">
-                            <div class="d-flex justify-content-between mb-2">
-                                <h5 class="card-title mb-0 fw-bold text-primary">
-                                    <a href="index.php?page=product&id=<?= $review['product_id'] ?>" class="text-decoration-none">
-                                        <?= htmlspecialchars($review['product_name']) ?>
-                                    </a>
-                                </h5>
-                                <span class="text-muted small"><?= date('d.m.Y', strtotime($review['created_at'])) ?></span>
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <h5 class="card-title mb-0 fw-bold">
+                                        <a href="index.php?page=product&id=<?= $review['product_id'] ?>" class="text-decoration-none text-primary">
+                                            <?= e($review['product_name']) ?>
+                                        </a>
+                                    </h5>
+                                    <span class="text-muted small"><?= date('d.m.Y', strtotime($review['created_at'])) ?></span>
+                                </div>
+
+                                <form action="index.php?page=profile_review_delete" method="POST" onsubmit="return confirm('Czy na pewno chcesz usunąć tę opinię?');">
+                                    <input type="hidden" name="review_id" value="<?= $review['id'] ?>">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Usuń opinię">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
                             </div>
 
                             <div class="mb-2 text-warning">
@@ -37,7 +46,7 @@
                                 <?php endfor; ?>
                             </div>
 
-                            <p class="card-text text-muted">"<?= htmlspecialchars($review['content']) ?>"</p>
+                            <p class="card-text text-muted mb-0">"<?= e($review['comment']) ?>"</p>
                         </div>
                     </div>
                 <?php endforeach; ?>

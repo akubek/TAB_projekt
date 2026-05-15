@@ -15,12 +15,13 @@ return [
     'logout'            => fn($c) => $c['authController']($c)->logout(),
     'register'          => fn($c) => $c['authController']($c)->showRegister(),
 
-    'profile'           => fn($c) => $c['profileController']($c)->index(),
-    'profile_orders'    => fn($c) => $c['profileController']($c)->orders(),
-    'profile_reviews'   => fn($c) => $c['profileController']($c)->reviews(),
-    'profile_addresses' => fn($c) => $c['profileController']($c)->addresses(),
-    'profile_settings'  => fn($c) => $c['profileController']($c)->settings(),
-    'change_password'   => fn($c) => $c['profileController']($c)->changePassword(),
+    'profile'                   => fn($c) => $c['profileController']($c)->index(),
+    'profile_orders'            => fn($c) => $c['profileController']($c)->orders(),
+    'profile_reviews'           => fn($c) => $c['profileController']($c)->reviews(),
+    'profile_review_delete'    => fn($c) => $c['profileController']($c)->deleteReview(),
+    'profile_addresses'         => fn($c) => $c['profileController']($c)->addresses(),
+    'profile_settings'          => fn($c) => $c['profileController']($c)->settings(),
+    'change_password'           => fn($c) => $c['profileController']($c)->changePassword(),
 
     // Recenzje
     'add_review'        => fn($c) => $c['reviewController']($c)->add(),

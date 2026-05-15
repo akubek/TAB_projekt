@@ -159,4 +159,31 @@ class OrderManager
 
         return $order;
     }
+
+    public function getOrdersForUser($userId)
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT id, total_price, status, delivery_method, payment_method, created_at
+            FROM orders
+            WHERE user_id = ?
+            ORDER BY created_at DESC
+        ");
+        $stmt->execute([$userId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getLatestOrderForUser($userId)
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT id, total_price, status, created_at 
+            FROM orders 
+            WHERE user_id = ? 
+            ORDER BY created_at DESC 
+            LIMIT 1
+        ");
+        $stmt->execute([$userId]);
+        $order = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $order ?: null;
+    }
 }

@@ -3,10 +3,14 @@
 class ProfileController
 {
     private $userManager;
+    private $orderManager;
+    private $reviewManager;
 
-    public function __construct($userManager)
+    public function __construct($userManager, $orderManager, $reviewManager)
     {
         $this->userManager = $userManager;
+        $this->orderManager = $orderManager;
+        $this->reviewManager = $reviewManager;
     }
 
     private function requireLogin()
@@ -19,14 +23,24 @@ class ProfileController
 
     public function index()
     {
-        $user = $this->userManager->getUserById($_SESSION['user_id']);
-        renderView('profile/index', ['user' => $user]);
+        $this->requireLogin();
+        $userId = $_SESSION['user_id'];
+        $user = $this->userManager->getUserById($userId);
+        $lastOrder = $this->orderManager->getLatestOrderForUser($userId);
+
+        renderView('profile/index', [
+            'user' => $user,
+            'active_tab' => 'dashboard',
+            'last_order' => $lastOrder
+        ]);
     }
 
     public function settings()
     {
         $this->requireLogin();
-        $user = $this->userManager->getUserById($_SESSION['user_id']);
+        $userId = $_SESSION['user_id'];
+        $user = $this->userManager->getUserById($userId);
+
 
         // Zbieramy komunikaty z sesji (flash messages)
         $success = $_SESSION['profile_success'] ?? '';
@@ -44,15 +58,41 @@ class ProfileController
     public function orders()
     {
         $this->requireLogin();
-        // Tutaj w przyszłości użyjesz OrderManager->getUserOrders(...)
-        renderView('profile/orders', ['active_tab' => 'orders']);
+        $orders = $this->orderManager->getOrdersForUser($_SESSION['user_id']);
+        renderView('profile/orders', [
+            'orders' => $orders,
+            'active_tab' => 'orders'
+        ]);
     }
 
     public function reviews()
     {
         $this->requireLogin();
-        // Tutaj w przyszłości użyjesz ReviewManager->getUserReviews(...)
-        renderView('profile/reviews', ['active_tab' => 'reviews']);
+        $reviews = $this->reviewManager->getReviewsForUser($_SESSION['user_id']);
+
+        renderView('profile/reviews', [
+            'active_tab' => 'reviews',
+            'reviews' => $reviews
+        ]);
+    }
+
+    public function deleteReview()
+    {
+        $this->requireLogin();
+
+        if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['review_id'])) {
+            $reviewId = (int)$_POST['review_id'];
+
+            $deleted = $this->reviewManager->deleteReview($reviewId, $_SESSION['user_id']);
+
+            if ($deleted) {
+                $_SESSION['profile_success'] = "Opinia została pomyślnie usunięta.";
+            } else {
+                $_SESSION['profile_error'] = "Nie udało się usunąć opinii.";
+            }
+        }
+        header('Location: index.php?page=profile_reviews');
+        exit;
     }
 
     public function addresses()
@@ -65,25 +105,5 @@ class ProfileController
             'active_tab' => 'addresses',
             'addresses' => $addresses
         ]);
-    }
-
-    public function update()
-    {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $email = strtolower(trim($_POST['email']));
-            $id = $_SESSION['user_id'];
-
-            // Rozwiązanie błędu SQL: Walidacja e-maila w PHP
-            if ($this->userManager->isEmailTaken($email, $id)) {
-                $_SESSION['profile_error'] = "Ten adres e-mail jest już zajęty.";
-                header("Location: index.php?page=profile_edit");
-                exit;
-            }
-
-            $this->userManager->updateBasicData($id, $_POST['first_name'], $_POST['last_name'], $email);
-            $_SESSION['profile_success'] = "Dane zaktualizowane.";
-            header("Location: index.php?page=profile");
-            exit;
-        }
     }
 }

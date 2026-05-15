@@ -143,7 +143,7 @@ return [
         static $instance;
         if ($instance === null) {
             require_once BASE_PATH . '/src/controllers/ProfileController.php';
-            $instance = new ProfileController($c['userManager']($c));
+            $instance = new ProfileController($c['userManager']($c), $c['orderManager']($c), $c['reviewManager']($c));
         }
         return $instance;
     },
