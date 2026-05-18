@@ -5,7 +5,9 @@ class AuthController
         'checkout_form',
         'cart',
         'profile',
-        'home'
+        'home',
+        'admin_orders',
+        'admin_order_details'
     ];
 
     private $pdo;
@@ -125,9 +127,18 @@ class AuthController
                     $_SESSION['role'] = $user['role'];
                     $_SESSION['first_name'] = $user['first_name'];
 
-                    // redirect back to intended page or main page
-                    $targetPage = $_SESSION['intended_redirect'] ?? 'home';
+                    // Wyciągamy planowane przekierowanie (jeśli było)
+                    $targetPage = $_SESSION['intended_redirect'] ?? null;
                     unset($_SESSION['intended_redirect']); // bardzo ważne czyszczenie!
+
+                    // Jeśli brak planowanego przekierowania, decydujemy na podstawie roli
+                    if (!$targetPage) {
+                        if (in_array($user['role'], ['EMPLOYEE', 'MANAGER'])) {
+                            $targetPage = 'admin_orders';
+                        } else {
+                            $targetPage = 'home'; // Zwykły klient wraca na stronę główną
+                        }
+                    }
 
                     header("Location: index.php?page=" . $targetPage);
                     exit;
